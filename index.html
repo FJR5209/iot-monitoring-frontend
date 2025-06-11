@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inovação e Tecnologia para a Comunidade</title>
+    <!-- Favicon do Projeto -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M 50,5 L 90,27 L 90,60 C 90,78 72,95 50,95 C 28,95 10,78 10,60 L 10,27 Z' fill='%233b82f6' /%3E%3C/svg%3E">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .hero-bg {
+            background-image: linear-gradient(to top, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.6)), url('./assets/images/background1.png');
+            background-size: cover;
+            background-position: center;
+        }
+        .section-title { text-align: center; font-size: 2.25rem; font-weight: 800; margin-bottom: 1.5rem; }
+        .section-subtitle { text-align: center; max-width: 600px; margin: 0 auto 3rem auto; }
+        .content-card {
+            background-color: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-300">
+
+    <!-- Hero Section -->
+    <section class="hero-bg text-white">
+        <div class="container mx-auto px-6 py-24 md:py-32 lg:py-40 flex flex-col items-center text-center">
+            <div class="flex items-center justify-center mb-6">
+                <svg class="w-16 h-16" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 50,2 L 95,25 L 95,60 C 95,80 75,98 50,98 C 25,98 5,80 5,60 L 5,25 Z" fill="#e0f2fe" /><path d="M 50,5 L 90,27 L 90,60 C 90,78 72,95 50,95 C 28,95 10,78 10,60 L 10,27 Z" fill="#3b82f6" /><path d="M35,60 Q50,50 65,60 L65,75 Q50,65 35,75 Z" fill="#ffffff"/><path d="M35,62 V77" stroke="#bae6fd" stroke-width="1.5" fill="none"/><path d="M65,62 V77" stroke="#bae6fd" stroke-width="1.5" fill="none"/><path d="M50 30 C 40 20, 25 25, 25 40 Q 25 55, 50 70 Q 75 55, 75 40 C 75 25, 60 20, 50 30 Z" fill="#60a5fa"/><path d="M30,48 L 40,48 L 44,43 L 48,53 L 52,45 L 56,48 L 70,48" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50" cy="48" r="3" fill="#fbbf24"/></svg>
+            </div>
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-4">Tecnologia que Transforma. Pesquisa que Inspira.</h1>
+            <p class="text-lg md:text-xl max-w-3xl mb-8 text-slate-200">
+                Uma plataforma nascida da pesquisa académica no Acre, criada por jovens para resolver problemas reais da nossa comunidade.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="login.html" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition duration-300">Acessar Dashboard</a>
+                <a href="sobre.html" class="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-bold py-3 px-8 rounded-lg transition duration-300 border border-white/20">Sobre</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem & Solution Section -->
+    <section class="py-16 md:py-24">
+        <div class="container mx-auto px-6 content-card rounded-2xl shadow-lg p-8 md:p-12">
+            <h2 class="section-title text-white">Da Teoria à Prática: Um Desafio Real</h2>
+            <p class="section-subtitle text-slate-300">
+                A conservação de vacinas, bolsas de sangue e alimentos depende de um controlo de temperatura rigoroso. Falhas na cadeia de frio geram perdas críticas. Como podemos resolver isto de forma acessível e eficiente?
+            </p>
+            <div class="grid md:grid-cols-3 gap-8 text-center">
+                <div class="p-6">
+                    <div class="bg-blue-900/50 text-blue-300 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7.014A8.003 8.003 0 0117.657 18.657z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18a6 6 0 00-6-6" /></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-white">Monitorização de Precisão</h3>
+                    <p class="text-slate-400">Desenvolvemos um sistema que regista a temperatura em tempo real, garantindo a integridade de produtos sensíveis 24/7.</p>
+                </div>
+                <div class="p-6">
+                    <div class="bg-blue-900/50 text-blue-300 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-white">Alertas Imediatos</h3>
+                    <p class="text-slate-400">Em caso de desvio, o sistema envia alertas automáticos por e-mail e WhatsApp, permitindo ação rápida para evitar perdas.</p>
+                </div>
+                <div class="p-6">
+                     <div class="bg-blue-900/50 text-blue-300 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l-4 4-4-4 4-4" /></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-white">Tecnologia Aberta</h3>
+                    <p class="text-slate-400">Baseado em hardware de baixo custo e código aberto, o nosso projeto é acessível, replicável e adaptável a diferentes necessidades.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section class="py-16 md:py-24">
+        <div class="container mx-auto px-6">
+            <h2 class="section-title text-white">Inovação em Foco</h2>
+             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="content-card rounded-lg shadow-lg overflow-hidden">
+                    <img src="./assets/images/pexels-allecgomes-9762615.jpg" 
+                    alt="Imagem representando a interseção de tecnologia, educação e saúde" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2 text-white">Educação e Saúde</h3>
+                        <p class="text-slate-400">A tecnologia serve como uma ponte, conectando o conhecimento académico a soluções práticas que melhoram a saúde e o bem-estar da comunidade.</p>
+                    </div>
+                </div>
+                <div class="content-card rounded-lg shadow-lg overflow-hidden">
+                    <img src="./assets/images/pexels-divinetechygirl-1181271.jpg" 
+                    alt="Imagem de mãos de um jovem trabalhando com eletrónica" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2 text-white">O Poder do "Fazer"</h3>
+                        <p class="text-slate-400">Capacitar jovens com as ferramentas para construir, programar e inovar é o motor para o desenvolvimento de soluções locais e sustentáveis.</p>
+                    </div>
+                </div>
+                <div class="content-card rounded-lg shadow-lg overflow-hidden md:col-span-2 lg:col-span-1">
+                    <img src="./assets/images/pexels-tara-winstead-8386440.jpg" 
+                    alt="Imagem futurista de jovens a colaborar com tecnologia" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2 text-white">Um Futuro Colaborativo</h3>
+                        <p class="text-slate-400">O futuro é construído quando unimos a curiosidade da juventude, o apoio da academia e a necessidade da comunidade para inovar com propósito.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section class="py-16 md:py-24">
+        <div class="container mx-auto px-6 text-center content-card rounded-2xl shadow-lg p-8 md:p-12">
+             <h2 class="section-title text-white">Junte-se a Nós na Jornada da Inovação</h2>
+            <p class="section-subtitle text-slate-300">
+               Acreditamos que transformar e melhorar o nosso meio é um dever e uma oportunidade para todos, especialmente para os jovens. A pesquisa e a tecnologia são as nossas ferramentas mais poderosas para criar um impacto positivo.
+            </p>
+             <a href="sobre.html" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition duration-300">Pesquisa do Projeto</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900/50 text-white mt-16">
+        <div class="container mx-auto px-6 py-8 text-center">
+            <p>&copy; 2025 - Projeto de Monitorização IoT. Desenvolvido com base na pesquisa de Fredson Junior</p>
+            <p class="text-sm text-slate-400 mt-2">Apoiado pelo Instituto Federal do Acre (IFAC).</p>
+        </div>
+    </footer>
+
+</body>
+</html>

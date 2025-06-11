@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sobre o Projeto - Dashboard de Monitorização</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-300 transition-colors duration-500">
+
+    <header class="bg-white dark:bg-slate-800 shadow-sm">
+        <nav class="container mx-auto max-w-7xl flex items-center justify-between p-4">
+            <a href="index.html" class="cursor-pointer">
+                <h1 class="text-xl font-bold text-slate-800 dark:text-white">Dashboard de Monitorização</h1>
+            </a>
+            <a id="back-link" href="index.html" class="rounded-lg bg-slate-600 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700">
+                &larr; Voltar à página inicial
+            </a>
+        </nav>
+    </header>
+
+    <main class="container mx-auto max-w-7xl p-4">
+        <div class="mt-4 space-y-8">
+            <div class="rounded-lg bg-white dark:bg-slate-800 p-6 shadow">
+                <h3 class="text-2xl font-bold mb-4 text-slate-800 dark:text-white">Sobre o Projeto</h3>
+                <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Este sistema é a implementação prática e escalável da pesquisa académica "Sistema de Monitoramento Inteligente de Temperatura com ESP8266 e Integração ao ThingSpeak". O objetivo do estudo original, e desta plataforma, é fornecer uma solução de baixo custo, eficiente e de código aberto para o monitoramento de temperaturas críticas, essencial para a conservação de insumos sensíveis como vacinas, medicamentos e alimentos na cadeia de frio.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="rounded-lg bg-white dark:bg-slate-800 p-6 shadow">
+                    <h4 class="text-xl font-bold mb-4 text-slate-800 dark:text-white">Bases Teóricas e Metodologia</h4>
+                    <ul class="space-y-3 list-disc list-inside text-slate-600 dark:text-slate-300">
+                        <li><strong class="dark:text-slate-100">Internet das Coisas (IoT):</strong> Utilização de dispositivos conectados (ESP8266) para coletar dados do mundo físico e enviá-los para a nuvem em tempo real.</li>
+                        <li><strong class="dark:text-slate-100">Hardware de Baixo Custo:</strong> A escolha do microcontrolador ESP8266 e do sensor de precisão DS18B20 foi fundamental para criar uma solução economicamente acessível.</li>
+                        <li><strong class="dark:text-slate-100">Análise de Séries Temporais:</strong> Os dados de temperatura são coletados como uma série temporal, permitindo a identificação de padrões, tendências e anomalias através de gráficos e estatísticas.</li>
+                        <li><strong class="dark:text-slate-100">Alertas Multicanal:</strong> A metodologia inclui o envio de alertas críticos via E-mail e WhatsApp, garantindo que desvios de temperatura sejam comunicados de forma rápida e redundante.</li>
+                    </ul>
+                </div>
+                <div class="rounded-lg bg-white dark:bg-slate-800 p-6 shadow">
+                    <h4 class="text-xl font-bold mb-4 text-slate-800 dark:text-white">Custos e Viabilidade</h4>
+                    <p class="text-slate-600 dark:text-slate-300 mb-4">O estudo demonstrou que a solução proposta é <strong>53,51% mais barata</strong> que alternativas comerciais como o RCW-800W, sem sacrificar a precisão ou a fiabilidade.</p>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex justify-between border-b dark:border-slate-700 pb-2"><span>Componente</span> <strong>Custo (BRL)</strong></li>
+                        <li class="flex justify-between"><span>ESP8266</span> <span>R$ 29,99</span></li>
+                        <li class="flex justify-between"><span>Sensor DS18B20</span> <span>R$ 16,50</span></li>
+                        <li class="flex justify-between border-t dark:border-slate-700 pt-2"><strong>Custo Total Proposto</strong> <strong class="text-green-400">R$ 46,49</strong></li>
+                        <li class="flex justify-between"><strong>Custo Comercial Mín.</strong> <strong class="text-red-400">R$ 100,00+</strong></li>
+                    </ul>
+                </div>
+            </div>
+
+             <div class="rounded-lg bg-white dark:bg-slate-800 p-6 shadow">
+                <h4 class="text-xl font-bold mb-4 text-slate-800 dark:text-white">Relevância e Benchmarks</h4>
+                <p class="text-slate-600 dark:text-slate-300 mb-4 leading-relaxed">
+                    A abordagem do artigo é perspicaz por atacar um problema crítico, especialmente em regiões com desafios logísticos. A cadeia de frio é um pilar para a saúde pública e segurança alimentar. Soluções de monitoramento de baixo custo e código aberto são reconhecidas globalmente como essenciais para democratizar o acesso a esta tecnologia.
+                </p>
+                <ul class="space-y-2 text-sm list-disc list-inside">
+                    <li>Um relatório da <a href="https://www.who.int/news-room/fact-sheets/detail/immunization-coverage" target="_blank" class="text-blue-500 dark:text-blue-400 hover:underline">Organização Mundial da Saúde (OMS)</a> destaca que falhas na cadeia de frio são uma das principais causes de desperdício de vacinas. Projetos como este abordam diretamente essa questão.</li>
+                    <li>A comunidade de hardware aberto, documentada em plataformas como a <a href="https://www.mdpi.com/journal/hardwarex" target="_blank" class="text-blue-500 dark:text-blue-400 hover:underline">revista científica HardwareX</a>, evidencia um movimento crescente para o uso de tecnologia "faça-você-mesmo" para resolver problemas científicos e sociais complexos, validando a abordagem "maker" do artigo.</li>
+                </ul>
+            </div>
+            
+            <div class="rounded-lg bg-white dark:bg-slate-800 p-6 shadow">
+                <h4 class="text-xl font-bold mb-4 text-slate-800 dark:text-white">Fontes e Referências</h4>
+                <p class="text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
+                    Toda a informação, dados e metodologia apresentados nesta página são derivados diretamente do artigo de pesquisa original e de fontes de referência que validam o seu contexto e relevância.
+                </p>
+                <ul class="space-y-4 text-sm list-disc list-inside">
+                    <li><strong class="dark:text-slate-100">Fonte Principal (Artigo):</strong> "Sistema de Monitoramento Inteligente de Temperatura com ESP8266 e Integração ao ThingSpeak". Todos os dados de metodologia, custos, e resultados de testes foram extraídos deste documento.</li>
+                     <li><strong class="dark:text-slate-100">Código-Fonte do Protótipo Original:</strong> O código do hardware e a lógica inicial do projeto estão disponíveis publicamente no repositório <a href="https://github.com/FJR5209/STU-ThingSpeak" target="_blank" class="text-blue-500 dark:text-blue-400 hover:underline">GitHub: FJR5209/STU-ThingSpeak</a>.</li>
+                    <li><strong class="dark:text-slate-100">Base Teórica de Análise de Dados:</strong> A abordagem para análise de séries temporais foi informada pela obra "Análise de Séries Temporais, 2ª edição" de Moretin, P. e Toloi, C. (2006).</li>
+                    <li><strong class="dark:text-slate-100">Fonte para Benchmarking (Saúde Global):</strong> Relatórios da Organização Mundial da Saúde (OMS) sobre a importância da cadeia de frio na imunização global.</li>
+                    <li><strong class="dark:text-slate-100">Fonte para Benchmarking (Ciência Aberta):</strong> Publicações da revista científica HardwareX, que valida a relevância de soluções de hardware de baixo custo e código aberto em contextos académicos e sociais.</li>
+                </ul>
+            </div>
+
+            <div class="rounded-lg bg-white dark:bg-slate-800 p-6 shadow">
+                <h4 class="text-xl font-bold mb-4 text-slate-800 dark:text-white">Inspiração para Novos Projetos</h4>
+                <p class="text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
+                    A tecnologia usada neste projeto (ESP8266, sensores e IoT) abre portas para inúmeras outras aplicações inovadoras. O objetivo é fomentar a curiosidade e encorajar outros estudantes a explorar e criar. Abaixo estão algumas ideias de projetos que seguem a mesma filosofia de baixo custo e alto impacto:
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="border border-slate-200 dark:border-slate-700 p-4 rounded-lg">
+                        <h5 class="font-bold text-slate-700 dark:text-slate-100">Estação Meteorológica Local</h5>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 mt-2">Construir uma estação que mede temperatura, humidade, pressão atmosférica e qualidade do ar, enviando os dados para uma API pública e criando um mapa colaborativo da sua cidade.</p>
+                    </div>
+                    <div class="border border-slate-200 dark:border-slate-700 p-4 rounded-lg">
+                        <h5 class="font-bold text-slate-700 dark:text-slate-100">Sistema de Irrigação Inteligente</h5>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 mt-2">Usar sensores de humidade do solo para automatizar a rega de plantas ou pequenas hortas, economizando água e otimizando o cultivo. Ideal para projetos de agricultura familiar.</p>
+                    </div>
+                    <div class="border border-slate-200 dark:border-slate-700 p-4 rounded-lg">
+                        <h5 class="font-bold text-slate-700 dark:text-slate-100">Monitoramento de Consumo de Energia</h5>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 mt-2">Criar um dispositivo não-invasivo que se acopla ao medidor de energia de uma casa para monitorar o consumo em tempo real, ajudando a promover a eficiência energética.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded-lg bg-white dark:bg-slate-800 p-6 shadow text-center">
+                <h4 class="text-xl font-bold mb-4 text-slate-800 dark:text-white">Apoio e Fomento à Pesquisa no IFAC</h4>
+                <p class="text-slate-600 dark:text-slate-300 mb-4 max-w-4xl mx-auto">
+                    Este projeto é um exemplo do que pode ser alcançado com o apoio institucional à inovação. O **Instituto Federal do Acre (IFAC)** desempenha um papel crucial ao financiar e fornecer a infraestrutura necessária, como o **Laboratório Maker**, para que estudantes e professores possam transformar ideias em protótipos funcionais e pesquisas de impacto.
+                </p>
+                <p class="text-slate-600 dark:text-slate-300 max-w-4xl mx-auto">
+                    O IFAC incentiva ativamente a participação dos seus alunos em editais de pesquisa e programas de iniciação científica, oferecendo bolsas e orientação para o desenvolvimento de projetos que resolvem problemas reais da nossa comunidade e do nosso estado.
+                </p>
+            </div>
+
+            <div class="rounded-lg bg-white dark:bg-slate-800 p-6 shadow text-center">
+                <h4 class="text-xl font-bold mb-4 text-slate-800 dark:text-white">Créditos</h4>
+                <p class="text-slate-600 dark:text-slate-300 mb-2">Este projeto é baseado no trabalho e pesquisa de:</p>
+                <p class="font-semibold text-slate-800 dark:text-slate-100 text-lg">Fredson Junior </p>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-4">Com o apoio e parceria institucional de:</p>
+                <p class="font-semibold text-slate-800 dark:text-slate-100 mt-2">Instituto Federal do Acre (IFAC)</p>
+                <p class="font-semibold text-slate-800 dark:text-slate-100">HEMOACRE (Centro de Hematologia e Hemoterapia do Acre)</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const backLink = document.getElementById('back-link');
+            const authToken = localStorage.getItem('authToken');
+
+            if (authToken) {
+                backLink.href = 'dashboard.html';
+                backLink.innerHTML = '&larr; Voltar ao Dashboard';
+            } else {
+                backLink.href = 'index.html';
+                backLink.innerHTML = '&larr; Voltar à página inicial';
+            }
+        });
+    </script>
+
+</body>
+</html>

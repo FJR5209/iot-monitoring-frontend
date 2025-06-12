@@ -111,7 +111,7 @@
           chartCanvas: document.getElementById('temp-chart'),
         };
 
-        const API_URL = 'http://localhost:3000/api/v1';
+        const API_URL = 'https://iot-monitoring-backend-yzqm.onrender.com/api/v1';
         const state = { authToken: localStorage.getItem('authToken'), user: JSON.parse(localStorage.getItem('user')), tenantDevices: [] };
         let tempChartInstance = null;
         

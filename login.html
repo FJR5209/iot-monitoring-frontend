@@ -29,7 +29,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const loginForm = document.getElementById('login-form');
             const loginError = document.getElementById('login-error');
-            const API_URL = 'http://localhost:3000/api/v1';
+            const API_URL = 'https://iot-monitoring-backend-yzqm.onrender.com/api/v1';
             if (localStorage.getItem('authToken')) { window.location.href = 'dashboard.html'; }
             async function handleLogin(event) {
                 event.preventDefault();

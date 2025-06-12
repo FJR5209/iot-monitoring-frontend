@@ -1,6 +1,6 @@
-  <!DOCTYPE html>
-  <html lang="pt-BR" class="dark">
-  <head>
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Sistema de Monitorização</title>
@@ -8,337 +8,64 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap');
-      body { font-family: 'Inter', sans-serif; }
-      .hero-bg {
-        background-image: linear-gradient(to top, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.6)), url('https://storage.googleapis.com/gemini-prod-us-west1-assets/e69f8c679905953909ad5c66b1a2088b');
-        background-size: cover;
-        background-position: center;
-      }
-      .chart-container { position: relative; height: 40vh; width: 100%; }
-      #user-menu { transition: opacity 0.3s, transform 0.3s; }
-      .modal-overlay {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background-color: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(5px);
-        display: flex; align-items: center; justify-content: center;
-        z-index: 50;
-      }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .chart-container { position: relative; height: 40vh; width: 100%; }
+        #user-menu { transition: opacity 0.3s, transform 0.3s; }
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 50;
+        }
     </style>
-  </head>
-  <body class="bg-slate-900 text-slate-200">
+</head>
+<body class="bg-slate-900 text-slate-200">
 
     <div id="dashboard-view">
-      <!-- Header com Logotipo e Menu -->
-      <header class="bg-slate-800/50 backdrop-blur-sm shadow-sm sticky top-0 z-40">
-        <nav class="container mx-auto max-w-7xl flex items-center justify-between p-4 relative">
-          <a href="#" id="home-link" class="cursor-pointer flex items-center gap-3">
-            <svg class="w-8 h-8" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 50,5 L 90,27 L 90,60 C 90,78 72,95 50,95 C 28,95 10,78 10,60 L 10,27 Z" fill="#3b82f6" /></svg>
-            <h1 class="text-xl font-bold text-white">Dashboard de Monitorização</h1>
-          </a>
-          <div class="flex items-center">
-            <button id="user-menu-button" class="rounded-md p-2 hover:bg-slate-700">
-              <svg class="h-6 w-6 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
-            </button>
-          </div>
-          <div id="user-menu" class="hidden absolute top-16 right-4 mt-2 w-56 origin-top-right rounded-md bg-slate-800 shadow-lg ring-1 ring-slate-700 ring-opacity-5 focus:outline-none" role="menu">
-            <div class="py-1" role="none">
-              <a href="#" id="view-devices-link" class="text-slate-300 block px-4 py-2 text-sm hover:bg-slate-700" role="menuitem">Ver Meus Dispositivos</a>
-              <a href="#" id="manage-devices-link" class="text-slate-300 block px-4 py-2 text-sm hover:bg-slate-700" role="menuitem">Gerir Dispositivos</a>
-              <a href="#" id="manage-users-link" class="text-slate-300 block px-4 py-2 text-sm hover:bg-slate-700" role="menuitem">Gerir Utilizadores</a>
-              <a href="sobre.html" class="text-slate-300 block px-4 py-2 text-sm hover:bg-slate-700" role="menuitem">Sobre o Projeto</a>
-              <div class="border-t border-slate-700 my-1"></div>
-              <a href="#" id="logout-link" class="text-red-400 block px-4 py-2 text-sm hover:bg-slate-700" role="menuitem">Sair</a>
-            </div>
-          </div>
-        </nav>
-      </header>
-      
-      <!-- Hero Section do Dashboard REMOVIDA -->
-
-      <main class="container mx-auto max-w-7xl p-4">
-        <div id="main-content-view">
-          <!-- O conteúdo principal será renderizado aqui -->
-        </div>
-
-        <div id="device-detail-view" class="hidden">
-          <button id="back-to-list-button" class="mb-4 rounded-lg bg-slate-600 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700">
-            &larr; Voltar à Lista
-          </button>
-          <div class="rounded-lg bg-slate-800 p-6 shadow-xl">
-            <h3 id="device-detail-name" class="mb-4 text-xl font-bold text-white"></h3>
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-              <div class="lg:col-span-3">
-                <h4 class="text-lg font-semibold mb-2 text-slate-200">Últimas 10 Leituras de Temperatura</h4>
-                <div class="chart-container"><canvas id="temp-chart"></canvas></div>
-              </div>
-              <div class="lg:col-span-1">
-                <h4 class="text-lg font-semibold mb-2 text-slate-200">Estatísticas (Últimas 24h)</h4>
-                <div id="stats-content" class="space-y-2"><p>A carregar...</p></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
+        <header class="bg-slate-800/50 backdrop-blur-sm shadow-sm sticky top-0 z-40">
+            <nav class="container mx-auto max-w-7xl flex items-center justify-between p-4 relative">
+                <a href="#" id="home-link" class="cursor-pointer flex items-center gap-3">
+                    <svg class="w-8 h-8" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 50,5 L 90,27 L 90,60 C 90,78 72,95 50,95 C 28,95 10,78 10,60 L 10,27 Z" fill="#3b82f6" /></svg>
+                    <h1 class="text-xl font-bold text-white">Dashboard de Monitorização</h1>
+                </a>
+                <div class="flex items-center">
+                    <button id="user-menu-button" class="rounded-md p-2 hover:bg-slate-700">
+                        <svg class="h-6 w-6 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
+                    </button>
+                </div>
+                <div id="user-menu" class="hidden absolute top-16 right-4 mt-2 w-56 origin-top-right rounded-md bg-slate-800 shadow-lg ring-1 ring-slate-700 ring-opacity-5 focus:outline-none" role="menu">
+                    <div class="px-4 py-3 border-b border-slate-700">
+                        <p class="text-sm text-white">Sessão iniciada como</p>
+                        <p id="menu-user-email" class="text-sm font-medium text-white truncate"></p>
+                    </div>
+                    <div class="py-1" role="none">
+                        <a href="#" id="my-profile-link" class="text-slate-300 block px-4 py-2 text-sm hover:bg-slate-700" role="menuitem">Meu Perfil</a>
+                        <a href="#" id="view-devices-link" class="text-slate-300 block px-4 py-2 text-sm hover:bg-slate-700" role="menuitem">Ver Meus Dispositivos</a>
+                        <a href="#" id="manage-devices-link" class="text-slate-300 block px-4 py-2 text-sm hover:bg-slate-700" role="menuitem">Gerir Dispositivos</a>
+                        <a href="#" id="manage-users-link" class="text-slate-300 block px-4 py-2 text-sm hover:bg-slate-700" role="menuitem">Gerir Utilizadores</a>
+                        <a href="sobre.html" class="text-slate-300 block px-4 py-2 text-sm hover:bg-slate-700" role="menuitem">Sobre o Projeto</a>
+                    </div>
+                    <div class="border-t border-slate-700"></div>
+                    <div class="py-1" role="none"><a href="#" id="logout-link" class="text-red-400 block px-4 py-2 text-sm hover:bg-slate-700" role="menuitem">Sair</a></div>
+                </div>
+            </nav>
+        </header>
+        
+        <main class="container mx-auto max-w-7xl p-4">
+            <div id="main-content-view" class="mt-4"></div>
+            <div id="device-detail-view" class="hidden"></div>
+        </main>
     </div>
 
     <div id="modal-container" class="hidden modal-overlay">
-      <div class="bg-slate-800 rounded-lg shadow-xl w-full max-w-md p-6">
-        <h3 id="modal-title" class="text-xl font-bold mb-4 text-white"></h3>
-        <div id="modal-body"></div>
-      </div>
+        <div class="bg-slate-800 rounded-lg shadow-xl w-full max-w-lg p-6">
+            <h3 id="modal-title" class="text-xl font-bold mb-4 text-white"></h3>
+            <div id="modal-body"></div>
+        </div>
     </div>
 
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        const elements = {
-          // Removidos: welcomeMessage, tenantDisplay
-          mainContentView: document.getElementById('main-content-view'),
-          userMenuButton: document.getElementById('user-menu-button'),
-          userMenu: document.getElementById('user-menu'),
-          manageUsersLink: document.getElementById('manage-users-link'),
-          manageDevicesLink: document.getElementById('manage-devices-link'),
-          viewDevicesLink: document.getElementById('view-devices-link'),
-          logoutLink: document.getElementById('logout-link'),
-          homeLink: document.getElementById('home-link'),
-          modalContainer: document.getElementById('modal-container'),
-          modalTitle: document.getElementById('modal-title'),
-          modalBody: document.getElementById('modal-body'),
-          deviceDetailView: document.getElementById('device-detail-view'),
-          backToListButton: document.getElementById('back-to-list-button'),
-          deviceDetailName: document.getElementById('device-detail-name'),
-          statsContent: document.getElementById('stats-content'),
-          chartCanvas: document.getElementById('temp-chart'),
-        };
-
-        const API_URL = 'https://iot-monitoring-backend-yzqm.onrender.com/api/v1';
-        const state = { authToken: localStorage.getItem('authToken'), user: JSON.parse(localStorage.getItem('user')), tenantDevices: [] };
-        let tempChartInstance = null;
-        
-        if (!state.authToken || !state.user) { window.location.href = 'login.html'; return; }
-
-        async function apiRequest(endpoint, method = 'GET', body = null) {
-          const headers = {'Content-Type': 'application/json', 'Authorization': `Bearer ${state.authToken}`};
-          const config = { method, headers };
-          if (body) config.body = JSON.stringify(body);
-          const response = await fetch(`${API_URL}${endpoint}`, config);
-          if (!response.ok) {
-            const errorData = await response.json();
-            if(response.status === 401) handleLogout();
-            throw new Error(errorData.message || `Erro na API`);
-          }
-          const contentType = response.headers.get("content-type");
-          if (contentType && contentType.indexOf("application/json") !== -1) return response.json();
-        }
-        
-        function switchView(viewName) {
-          elements.mainContentView.classList.remove('hidden');
-          elements.deviceDetailView.classList.add('hidden');
-          if (viewName === 'detail') {
-            elements.mainContentView.classList.add('hidden');
-            elements.deviceDetailView.classList.remove('hidden');
-          }
-        }
-
-        async function showDeviceCardView() {
-          switchView('list');
-          elements.mainContentView.innerHTML = `<div class="rounded-lg bg-slate-800 p-6 shadow-xl"><p>A carregar os seus dispositivos...</p></div>`;
-          try {
-            const devices = await apiRequest('/devices');
-            if (devices.length === 0) {
-              elements.mainContentView.innerHTML = `<div class="rounded-lg bg-slate-800 p-6 shadow-xl"><p>Nenhum dispositivo encontrado.</p></div>`;
-              return;
-            }
-            let devicesHtml = '<h3 class="text-xl font-bold mb-4 text-white">Seus Dispositivos</h3><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">';
-            devices.forEach(device => {
-              devicesHtml += `<div class="device-card border border-slate-700 rounded-lg p-4 cursor-pointer bg-slate-800 hover:bg-slate-700 transition-colors" data-deviceid="${device._id}" data-devicename="${device.name}">
-                        <h4 class="font-bold text-lg pointer-events-none text-white">${device.name}</h4>
-                        <p class="text-sm text-slate-400 pointer-events-none">Status: <span class="font-semibold">${device.status}</span></p>
-                      </div>`;
-            });
-            devicesHtml += '</div>';
-            elements.mainContentView.innerHTML = `<div class="rounded-lg bg-slate-800 p-6 shadow-xl">${devicesHtml}</div>`;
-            document.querySelectorAll('.device-card').forEach(card => card.addEventListener('click', e => showDeviceDetailView(e.currentTarget.dataset.deviceid, e.currentTarget.dataset.devicename)));
-          } catch (error) { elements.mainContentView.innerHTML = `<div class="rounded-lg bg-slate-800 p-6 shadow-xl"><p class="text-red-400">Erro: ${error.message}</p></div>`; }
-        }
-        
-        function showDeviceDetailView(deviceId, deviceName) {
-          switchView('detail');
-          elements.deviceDetailName.textContent = `A analisar: ${deviceName}`;
-          fetchAndRenderDeviceData(deviceId);
-        }
-
-        async function fetchAndRenderDeviceData(deviceId) {
-          elements.statsContent.innerHTML = '<p>A carregar...</p>';
-          if(tempChartInstance) tempChartInstance.destroy();
-          const endDate = new Date(), startDate = new Date(endDate.getTime() - 24 * 60 * 60 * 1000);
-          try {
-            const data = await apiRequest(`/dashboard/device/${deviceId}?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`);
-            renderChart(data.chartData);
-            renderStats(data.stats);
-          } catch (error) {
-            elements.statsContent.innerHTML = `<p class="text-red-400">Erro: ${error.message}</p>`;
-            if(tempChartInstance) tempChartInstance.destroy();
-          }
-        }
-
-        function renderChart(chartData) {
-          if (tempChartInstance) tempChartInstance.destroy();
-          const recentChartData = chartData.slice(-10);
-          const labels = recentChartData.map(d => new Date(d.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }));
-          const dataPoints = recentChartData.map(d => d.temperature);
-          Chart.defaults.color = '#94a3b8';
-          tempChartInstance = new Chart(elements.chartCanvas, {
-            type: 'line', data: { labels, datasets: [{
-              label: 'Temperatura', data: dataPoints, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.2)', fill: true, tension: 0.3
-            }]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { title: { display: true, text: 'Temperatura (°C)', color: '#94a3b8' }, grid: { color: 'rgba(100, 116, 139, 0.2)' }, ticks: { color: '#94a3b8' } }, x: { grid: { color: 'rgba(100, 116, 139, 0.2)' }, ticks: { color: '#94a3b8' } } } }
-          });
-        }
-
-        function renderStats(stats) {
-          if (!stats || stats.maxTemp === null) {
-            elements.statsContent.innerHTML = '<p>Sem dados de temperatura para este período.</p>';
-            return;
-          }
-          elements.statsContent.innerHTML = `<div class="p-3 bg-red-900/50 rounded-lg text-red-300"><strong>Máxima:</strong> ${stats.maxTemp.toFixed(2)}°C</div><div class="p-3 bg-blue-900/50 rounded-lg text-blue-300"><strong>Mínima:</strong> ${stats.minTemp.toFixed(2)}°C</div><div class="p-3 bg-green-900/50 rounded-lg text-green-300"><strong>Média:</strong> ${stats.avgTemp.toFixed(2)}°C</div>`;
-        }
-
-        async function showDeviceManagementView() {
-          switchView('list');
-          try {
-            const devices = await apiRequest('/devices');
-            state.tenantDevices = devices;
-            let tableHtml = `<div class="rounded-lg bg-slate-800 p-6 shadow-xl"><div class="flex justify-between items-center mb-4"><h3 class="text-xl font-bold text-white">Gestão de Dispositivos</h3><button id="create-device-button" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Novo Dispositivo</button></div><div class="overflow-x-auto"><table class="w-full text-left"><thead><tr class="border-b border-slate-700"><th class="py-2">Nome</th><th>Temp. Mín</th><th>Temp. Máx</th><th>Ações</th></tr></thead><tbody>`;
-            devices.forEach(d => {
-              tableHtml += `<tr class="border-b border-slate-700"><td class="py-2 pr-2">${d.name}</td><td>${d.settings.tempMin}°C</td><td>${d.settings.tempMax}°C</td><td class="whitespace-nowrap"><button class="edit-device-button text-blue-400 mr-2" data-deviceid="${d._id}">Editar</button><button class="delete-device-button text-red-400" data-deviceid="${d._id}">Apagar</button></td></tr>`;
-            });
-            tableHtml += `</tbody></table></div></div>`;
-            elements.mainContentView.innerHTML = tableHtml;
-            document.getElementById('create-device-button').addEventListener('click', () => showDeviceForm());
-            document.querySelectorAll('.edit-device-button').forEach(btn => btn.addEventListener('click', e => showDeviceForm(e.target.dataset.deviceid)));
-            document.querySelectorAll('.delete-device-button').forEach(btn => btn.addEventListener('click', e => handleDeleteDevice(e.target.dataset.deviceid)));
-          } catch (error) { elements.mainContentView.innerHTML = `<div class="rounded-lg bg-slate-800 p-6 shadow-xl"><p class="text-red-400">Erro: ${error.message}</p></div>`; }
-        }
-
-        async function showDeviceForm(deviceId = null) {
-          elements.modalContainer.classList.remove('hidden');
-          elements.modalTitle.textContent = deviceId ? 'Editar Dispositivo' : 'Criar Novo Dispositivo';
-          let formHtml = `<form id="device-form"><input type="hidden" id="deviceId" value="${deviceId || ''}"><div class="mb-4"><label for="deviceName" class="text-slate-300">Nome do Dispositivo</label><input type="text" id="deviceName" required class="w-full p-2 border rounded bg-slate-700 border-slate-600"></div><div class="grid grid-cols-2 gap-4 mb-4"><div><label for="deviceTempMin" class="text-slate-300">Temp. Mín (°C)</label><input type="number" step="0.1" id="deviceTempMin" class="w-full p-2 border rounded bg-slate-700 border-slate-600" value="2"></div><div><label for="deviceTempMax" class="text-slate-300">Temp. Máx (°C)</label><input type="number" step="0.1" id="deviceTempMax" class="w-full p-2 border rounded bg-slate-700 border-slate-600" value="8"></div></div><div id="device-key-display" class="hidden mt-4 mb-4"><label class="block text-sm font-medium text-slate-400">Device Key</label><input type="text" id="deviceKey" readonly class="w-full p-2 border rounded bg-slate-700 border-slate-600 cursor-not-allowed"></div><div class="flex justify-end space-x-2"><button type="button" id="cancel-modal-button" class="bg-slate-500 text-white px-4 py-2 rounded-lg">Cancelar</button><button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg">Salvar</button></div></form>`;
-          elements.modalBody.innerHTML = formHtml;
-          if (deviceId) {
-            const device = await apiRequest(`/devices/${deviceId}`);
-            document.getElementById('deviceName').value = device.name;
-            document.getElementById('deviceTempMin').value = device.settings.tempMin;
-            document.getElementById('deviceTempMax').value = device.settings.tempMax;
-            document.getElementById('device-key-display').classList.remove('hidden');
-            document.getElementById('deviceKey').value = device.deviceKey;
-          }
-          document.getElementById('cancel-modal-button').addEventListener('click', () => elements.modalContainer.classList.add('hidden'));
-          document.getElementById('device-form').addEventListener('submit', handleSaveDevice);
-        }
-
-        async function handleSaveDevice(event) {
-          event.preventDefault();
-          const deviceId = document.getElementById('deviceId').value;
-          const payload = { name: document.getElementById('deviceName').value, tempMin: document.getElementById('deviceTempMin').value, tempMax: document.getElementById('deviceTempMax').value };
-          try {
-            if (deviceId) { await apiRequest(`/devices/${deviceId}`, 'PUT', payload); elements.modalContainer.classList.add('hidden'); showDeviceManagementView(); } else {
-              const newDevice = await apiRequest('/devices', 'POST', payload);
-              elements.modalTitle.textContent = 'Dispositivo Criado com Sucesso!';
-              elements.modalBody.innerHTML = `<p class="mb-2 text-slate-300">O dispositivo "${newDevice.name}" foi criado.</p><p class="mb-4 text-slate-300">Guarde esta Device Key. Ela é necessária para configurar o seu dispositivo físico e para vinculá-lo a utilizadores.</p><div class="mb-4"><label class="block text-sm font-medium text-slate-400">Device Key</label><input type="text" readonly value="${newDevice.deviceKey}" class="w-full p-2 border rounded bg-slate-700 border-slate-600"></div><div class="flex justify-end"><button id="close-success-modal" class="bg-blue-600 text-white px-4 py-2 rounded-lg">Fechar</button></div>`;
-              document.getElementById('close-success-modal').addEventListener('click', () => { elements.modalContainer.classList.add('hidden'); showDeviceManagementView(); });
-            }
-          } catch(error) { alert(`Erro ao salvar: ${error.message}`); }
-        }
-
-        async function handleDeleteDevice(deviceId) { if (confirm('Tem a certeza? Os dados de histórico deste dispositivo não serão apagados.')) { try { await apiRequest(`/devices/${deviceId}`, 'DELETE'); showDeviceManagementView(); } catch(error) { alert(`Erro ao apagar: ${error.message}`); } } }
-        
-        async function showUserManagementView() {
-          switchView('list');
-          try {
-            const users = await apiRequest('/users');
-            let usersHtml = `<div class="rounded-lg bg-slate-800 p-6 shadow-xl"><div class="flex justify-between items-center mb-4"><h3 class="text-xl font-bold text-white">Gestão de Utilizadores</h3><button id="create-user-button" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Novo Utilizador</button></div><div class="overflow-x-auto"><table class="w-full text-left"><thead><tr class="border-b border-slate-700"><th class="py-2">Email</th><th>Role</th><th>Ações</th></tr></thead><tbody>`;
-            users.forEach(u => { usersHtml += `<tr class="border-b border-slate-700"><td class="py-2 pr-2">${u.email}</td><td>${u.role}</td><td class="whitespace-nowrap"><button class="edit-user-button text-blue-400 mr-2" data-userid="${u._id}">Editar</button><button class="delete-user-button text-red-400" data-userid="${u._id}">Apagar</button></td></tr>`; });
-            usersHtml += `</tbody></table></div></div>`;
-            elements.mainContentView.innerHTML = usersHtml;
-            document.getElementById('create-user-button').addEventListener('click', () => showUserForm());
-            document.querySelectorAll('.edit-user-button').forEach(btn => btn.addEventListener('click', e => showUserForm(e.target.dataset.userid)));
-            document.querySelectorAll('.delete-user-button').forEach(btn => btn.addEventListener('click', e => handleDeleteUser(e.target.dataset.userid)));
-          } catch (error) { elements.mainContentView.innerHTML = `<div class="rounded-lg bg-slate-800 p-6 shadow-xl"><p class="text-red-400">Erro: ${error.message}</p></div>`; }
-        }
-        
-        async function showUserForm(userId = null) {
-          elements.modalContainer.classList.remove('hidden');
-          elements.modalTitle.textContent = userId ? 'Editar Utilizador' : 'Criar Novo Utilizador';
-          let formHtml = `<form id="user-form"><input type="hidden" id="userId" value="${userId || ''}"><div class="mb-4"><label for="userEmail" class="text-slate-300">Email</label><input type="email" id="userEmail" required class="w-full p-2 border rounded bg-slate-700 border-slate-600"></div><div class="mb-4"><label for="userPassword" class="text-slate-300">Senha (deixar em branco para não alterar)</label><input type="password" id="userPassword" class="w-full p-2 border rounded bg-slate-700 border-slate-600"></div><div class="mb-4"><label for="userRole" class="text-slate-300">Role</label><select id="userRole" class="w-full p-2 border rounded bg-slate-700 border-slate-600"><option value="admin">Admin</option><option value="viewer">Viewer</option></select></div><div class="mb-4" id="device-assignment-container" style="display: none;"><label class="text-slate-300">Dispositivos Vinculados</label><div id="device-list-checkboxes" class="border rounded p-2 h-32 overflow-y-auto bg-slate-700 border-slate-600"></div></div><div class="flex justify-end space-x-2"><button type="button" id="cancel-modal-button" class="bg-slate-500 text-white px-4 py-2 rounded-lg">Cancelar</button><button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg">Salvar</button></div></form>`;
-          elements.modalBody.innerHTML = formHtml;
-          const roleSelect = document.getElementById('userRole');
-          roleSelect.addEventListener('change', e => { if (e.target.value === 'viewer') { populateDeviceCheckboxes(); } else { document.getElementById('device-assignment-container').style.display = 'none'; } });
-          document.getElementById('cancel-modal-button').addEventListener('click', () => elements.modalContainer.classList.add('hidden'));
-          document.getElementById('user-form').addEventListener('submit', handleSaveUser);
-          if (userId) {
-            const users = await apiRequest('/users');
-            const userToEdit = users.find(u => u._id === userId);
-            document.getElementById('userEmail').value = userToEdit.email;
-            roleSelect.value = userToEdit.role;
-            if (userToEdit.role === 'viewer') { await populateDeviceCheckboxes(userToEdit.devices.map(d => d._id)); }
-          }
-        }
-
-        async function populateDeviceCheckboxes(assignedDeviceIds = []) {
-          document.getElementById('device-assignment-container').style.display = 'block';
-          const listContainer = document.getElementById('device-list-checkboxes');
-          listContainer.innerHTML = 'A carregar dispositivos...';
-          if (state.tenantDevices.length === 0) await apiRequest('/devices').then(d => state.tenantDevices = d);
-          let checkboxesHtml = '';
-          state.tenantDevices.forEach(device => {
-            const isChecked = assignedDeviceIds.includes(device._id);
-            checkboxesHtml += `<div class="text-slate-300"><input type="checkbox" id="dev-${device._id}" value="${device._id}" ${isChecked ? 'checked' : ''} class="mr-2"> <label for="dev-${device._id}">${device.name}</label></div>`;
-          });
-          listContainer.innerHTML = checkboxesHtml || 'Nenhum dispositivo para vincular.';
-        }
-        
-        async function handleSaveUser(event) {
-          event.preventDefault();
-          const userId = document.getElementById('userId').value;
-          const email = document.getElementById('userEmail').value;
-          const password = document.getElementById('userPassword').value;
-          const role = document.getElementById('userRole').value;
-          let payload = { email, role };
-          if (password) payload.password = password;
-          if (role === 'viewer') { payload.devices = Array.from(document.querySelectorAll('#device-list-checkboxes input:checked')).map(cb => cb.value); }
-          try {
-            if (userId) { await apiRequest(`/users/${userId}`, 'PUT', payload); } else { payload.tenantName = state.user.tenant; await apiRequest(`/auth/register`, 'POST', payload); }
-            elements.modalContainer.classList.add('hidden');
-            showUserManagementView();
-          } catch (error) { alert(`Erro ao salvar: ${error.message}`); }
-        }
-        
-        async function handleDeleteUser(userId) { if (confirm('Tem a certeza que deseja apagar este utilizador?')) { try { await apiRequest(`/users/${userId}`, 'DELETE'); showUserManagementView(); } catch (error) { alert(`Erro ao apagar: ${error.message}`); } } }
-
-        function handleLogout() { localStorage.clear(); window.location.href = 'login.html'; }
-        
-        // Removido: mensagem de boas-vindas e tenant
-        if (state.user.role === 'admin') {
-          elements.manageUsersLink.style.display = 'block';
-          elements.manageDevicesLink.style.display = 'block';
-        } else {
-          elements.manageUsersLink.style.display = 'none';
-          elements.manageDevicesLink.style.display = 'none';
-        }
-        
-        elements.userMenuButton.addEventListener('click', () => elements.userMenu.classList.toggle('hidden'));
-        document.addEventListener('click', e => { if (!elements.userMenu.contains(e.target) && !elements.userMenuButton.contains(e.target)) elements.userMenu.classList.add('hidden'); });
-        
-        elements.manageUsersLink.addEventListener('click', e => { e.preventDefault(); showUserManagementView(); elements.userMenu.classList.add('hidden'); });
-        elements.manageDevicesLink.addEventListener('click', e => { e.preventDefault(); showDeviceManagementView(); elements.userMenu.classList.add('hidden'); });
-        elements.viewDevicesLink.addEventListener('click', e => { e.preventDefault(); showDeviceCardView(); elements.userMenu.classList.add('hidden'); });
-        elements.homeLink.addEventListener('click', e => { e.preventDefault(); showDeviceCardView(); });
-        elements.logoutLink.addEventListener('click', (e) => { e.preventDefault(); handleLogout(); });
-        
-        elements.backToListButton.addEventListener('click', showDeviceCardView);
-        showDeviceCardView();
-      });
-    </script>
-  </body>
-  </html>
+    <script type="module" src="./assets/js/main.js"></script>
+</body>
+</html>

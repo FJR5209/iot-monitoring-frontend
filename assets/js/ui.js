@@ -1,11 +1,6 @@
 // --- Módulo de UI (Interface do Usuário) ---
 // Responsável por gerar o HTML dinâmico da aplicação.
 
-import { apiRequest } from './api.js';
-import { toast } from './toast.js';
-
-
-
 let chartInstance = null;
 
 // --- Funções Auxiliares de UI ---
@@ -14,7 +9,7 @@ function switchView(viewName) {
     document.getElementById('device-detail-view').style.display = viewName === 'detail' ? 'block' : 'none';
 }
 
-function renderChart(canvas, chartData) {
+function renderChart(canvas, chartData, detailLevel = 'auto') {
     if (chartInstance) {
         chartInstance.destroy();
     }
@@ -23,12 +18,81 @@ function renderChart(canvas, chartData) {
         return;
     }
     
-    // Inverter a ordem dos dados para mostrar da esquerda para direita
-    const recentData = chartData.slice(-10).reverse();
-    const labels = recentData.map(d => new Date(d.timestamp).toLocaleTimeString('pt-BR', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
-    }));
+    // Estratégia responsiva baseada na quantidade de dados e nível de detalhe
+    let processedData = [];
+    let labels = [];
+    
+    // Se o nível de detalhe for manual, usar as configurações específicas
+    if (detailLevel === 'high') {
+        // Alto detalhe: mostrar todos os pontos (máximo 100)
+        const maxPoints = Math.min(chartData.length, 100);
+        const step = Math.ceil(chartData.length / maxPoints);
+        processedData = chartData.filter((_, index) => index % step === 0).reverse();
+        labels = processedData.map(d => new Date(d.timestamp).toLocaleTimeString('pt-BR', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        }));
+    } else if (detailLevel === 'medium') {
+        // Médio detalhe: amostragem moderada (máximo 50 pontos)
+        const maxPoints = Math.min(chartData.length, 50);
+        const step = Math.ceil(chartData.length / maxPoints);
+        processedData = chartData.filter((_, index) => index % step === 0).reverse();
+        labels = processedData.map(d => new Date(d.timestamp).toLocaleTimeString('pt-BR', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        }));
+    } else if (detailLevel === 'low') {
+        // Baixo detalhe: agregação por hora ou dia
+        if (chartData.length <= 1000) {
+            processedData = aggregateDataByHour(chartData);
+            labels = processedData.map(d => new Date(d.timestamp).toLocaleString('pt-BR', { 
+                day: '2-digit',
+                month: '2-digit',
+                hour: '2-digit', 
+                minute: '2-digit' 
+            }));
+        } else {
+            processedData = aggregateDataByDay(chartData);
+            labels = processedData.map(d => new Date(d.timestamp).toLocaleDateString('pt-BR', { 
+                day: '2-digit',
+                month: '2-digit'
+            }));
+        }
+    } else {
+        // Automático: usar a lógica responsiva baseada na quantidade de dados
+        if (chartData.length <= 50) {
+            // Poucos dados: mostrar todos os pontos
+            processedData = chartData.reverse();
+            labels = processedData.map(d => new Date(d.timestamp).toLocaleTimeString('pt-BR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            }));
+        } else if (chartData.length <= 200) {
+            // Dados moderados: mostrar a cada 2-3 pontos
+            const step = Math.ceil(chartData.length / 50);
+            processedData = chartData.filter((_, index) => index % step === 0).reverse();
+            labels = processedData.map(d => new Date(d.timestamp).toLocaleTimeString('pt-BR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            }));
+        } else if (chartData.length <= 1000) {
+            // Muitos dados: agregação por hora
+            processedData = aggregateDataByHour(chartData);
+            labels = processedData.map(d => new Date(d.timestamp).toLocaleString('pt-BR', { 
+                day: '2-digit',
+                month: '2-digit',
+                hour: '2-digit', 
+                minute: '2-digit' 
+            }));
+        } else {
+            // Muitíssimos dados: agregação por dia
+            processedData = aggregateDataByDay(chartData);
+            labels = processedData.map(d => new Date(d.timestamp).toLocaleDateString('pt-BR', { 
+                day: '2-digit',
+                month: '2-digit'
+            }));
+        }
+    }
     
     Chart.defaults.color = '#94a3b8';
     
@@ -39,7 +103,7 @@ function renderChart(canvas, chartData) {
                 labels,
                 datasets: [{
                     label: 'Temperatura',
-                    data: recentData.map(d => d.temperature),
+                    data: processedData.map(d => d.temperature),
                     borderColor: '#3b82f6',
                     backgroundColor: 'rgba(59, 130, 246, 0.2)',
                     fill: true,
@@ -64,7 +128,17 @@ function renderChart(canvas, chartData) {
                         titleColor: '#fff',
                         bodyColor: '#fff',
                         borderColor: 'rgba(255, 255, 255, 0.1)',
-                        borderWidth: 1
+                        borderWidth: 1,
+                        callbacks: {
+                            title: function(context) {
+                                const dataIndex = context[0].dataIndex;
+                                const dataPoint = processedData[dataIndex];
+                                if (dataPoint && dataPoint.count > 1) {
+                                    return `${context[0].label} (${dataPoint.count} leituras)`;
+                                }
+                                return context[0].label;
+                            }
+                        }
                     }
                 },
                 scales: {
@@ -88,7 +162,8 @@ function renderChart(canvas, chartData) {
                         ticks: {
                             color: '#94a3b8',
                             maxRotation: 45,
-                            minRotation: 45
+                            minRotation: 45,
+                            maxTicksLimit: 20
                         }
                     }
                 }
@@ -99,6 +174,56 @@ function renderChart(canvas, chartData) {
     }
     
     return chartInstance;
+}
+
+// Função para agregar dados por hora
+function aggregateDataByHour(data) {
+    const hourlyData = {};
+    
+    data.forEach(reading => {
+        const date = new Date(reading.timestamp);
+        const hourKey = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours()).getTime();
+        
+        if (!hourlyData[hourKey]) {
+            hourlyData[hourKey] = {
+                temperatures: [],
+                timestamp: hourKey
+            };
+        }
+        
+        hourlyData[hourKey].temperatures.push(reading.temperature);
+    });
+    
+    return Object.values(hourlyData).map(hour => ({
+        temperature: hour.temperatures.reduce((a, b) => a + b, 0) / hour.temperatures.length,
+        timestamp: hour.timestamp,
+        count: hour.temperatures.length
+    }));
+}
+
+// Função para agregar dados por dia
+function aggregateDataByDay(data) {
+    const dailyData = {};
+    
+    data.forEach(reading => {
+        const date = new Date(reading.timestamp);
+        const dayKey = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+        
+        if (!dailyData[dayKey]) {
+            dailyData[dayKey] = {
+                temperatures: [],
+                timestamp: dayKey
+            };
+        }
+        
+        dailyData[dayKey].temperatures.push(reading.temperature);
+    });
+    
+    return Object.values(dailyData).map(day => ({
+        temperature: day.temperatures.reduce((a, b) => a + b, 0) / day.temperatures.length,
+        timestamp: day.timestamp,
+        count: day.temperatures.length
+    }));
 }
 
 function renderStats(container, stats) {
@@ -250,7 +375,7 @@ function calculateStats(readings) {
     return stats;
 }
 
-export const render = {
+const render = {
     deviceCards: async (page = 1, search = '') => {
         switchView('list');
         const mainContentView = document.getElementById('main-content-view');
@@ -432,21 +557,43 @@ export const render = {
     
     deviceDetail: async (deviceId, deviceName) => {
         try {
-            const readings = await apiRequest(`/devices/${deviceId}/readings?limit=24`);
-            
+            // Busca inicial (últimas 24 leituras)
+            let readings = await apiRequest(`/devices/${deviceId}/readings?limit=24`);
         switchView('detail');
-            
             const detail = document.getElementById('device-detail-view');
-            
             detail.innerHTML = `
                 <button id="back-to-list-button" class="mb-4 rounded-lg bg-slate-600 px-4 py-2 text-sm text-white hover:bg-slate-700">
                     &larr; Voltar
                 </button>
                 <div class="rounded-lg bg-slate-800 p-6 shadow-xl">
                     <h3 class="text-xl font-bold text-white mb-4">${deviceName}</h3>
+                    <div class="flex flex-wrap gap-2 mb-4 items-end">
+                        <label class="flex flex-col">
+                            <span class="text-sm text-slate-300 mb-1">De:</span>
+                            <input type="datetime-local" id="start-date" class="rounded p-1 bg-gray-700 text-white text-opacity-50 placeholder:text-slate-400 placeholder-opacity-40 border border-gray-600 focus:ring-blue-500 focus:border-blue-500" />
+                        </label>
+                        <label class="flex flex-col">
+                            <span class="text-sm text-slate-300 mb-1">Até:</span>
+                            <input type="datetime-local" id="end-date" class="rounded p-1 bg-gray-700 text-white text-opacity-50 placeholder:text-slate-400 placeholder-opacity-40 border border-gray-600 focus:ring-blue-500 focus:border-blue-500" />
+                        </label>
+                        <button id="search-history" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
+                            Buscar
+                        </button>
+                        <div class="flex items-center gap-2 ml-4">
+                            <span class="text-sm text-slate-300">Detalhe:</span>
+                            <select id="detail-level" class="rounded p-1 bg-gray-700 text-white border border-gray-600 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="auto">Automático</option>
+                                <option value="high">Alto</option>
+                                <option value="medium">Médio</option>
+                                <option value="low">Baixo</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
                         <div class="lg:col-span-3">
-                            <h4 class="text-lg font-semibold mb-2 text-slate-200">Últimas 24 Leituras</h4>
+                            <h4 class="text-lg font-semibold mb-2 text-slate-200">
+                                <span id="chart-title">Últimas leituras</span>
+                            </h4>
                             <div class="chart-container" style="position: relative; height: 320px; width: 100%; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 16px;">
                                 <canvas id="temperature-chart"></canvas>
                             </div>
@@ -458,8 +605,77 @@ export const render = {
                     </div>
                 </div>
             `;
-            
-            // Adicionar evento ao botão voltar
+            // Evento de busca por período
+            document.getElementById('search-history').addEventListener('click', async () => {
+                const start = document.getElementById('start-date').value;
+                const end = document.getElementById('end-date').value;
+                if (!start || !end) {
+                    alert('Selecione o período!');
+                    return;
+                }
+                const startDate = new Date(start).toISOString();
+                const endDate = new Date(end).toISOString();
+                try {
+                    readings = await apiRequest(`/devices/${deviceId}/readings?startDate=${startDate}&endDate=${endDate}`);
+                    atualizarGraficoEStats();
+                } catch (err) {
+                    alert('Erro ao buscar histórico: ' + err.message);
+                }
+            });
+            // Evento de mudança no nível de detalhe
+            document.getElementById('detail-level').addEventListener('change', () => {
+                atualizarGraficoEStats();
+            });
+            // Função para atualizar gráfico e estatísticas
+            function atualizarGraficoEStats() {
+                requestAnimationFrame(() => {
+                    const chartCanvas = document.getElementById('temperature-chart');
+                    const dataCountElement = document.getElementById('data-count');
+                    const chartTitleElement = document.getElementById('chart-title');
+                    
+                    if (dataCountElement) {
+                        dataCountElement.textContent = readings.length;
+                    }
+                    
+                    if (chartCanvas) {
+                        // Passar o nível de detalhe selecionado
+                        const detailLevel = document.getElementById('detail-level')?.value || 'auto';
+                        renderChart(chartCanvas, readings, detailLevel);
+                    }
+                    
+                    const statsContent = document.getElementById('stats-content');
+                    if (statsContent) {
+                        const temps = readings.map(r => r.temperature);
+                        const max = Math.max(...temps).toFixed(2);
+                        const min = Math.min(...temps).toFixed(2);
+                        const avg = (temps.reduce((a, b) => a + b, 0) / temps.length).toFixed(2);
+                        
+                        // Atualizar título do gráfico baseado na quantidade de dados
+                        if (readings.length <= 50) {
+                            chartTitleElement.textContent = `Últimas leituras`;
+                        } else if (readings.length <= 200) {
+                            chartTitleElement.textContent = `Amostragem`;
+                        } else if (readings.length <= 1000) {
+                            chartTitleElement.textContent = `Agregação por hora`;
+                        } else {
+                            chartTitleElement.textContent = `Agregação por dia`;
+                        }
+                        
+                        statsContent.innerHTML = `
+                            <div class="p-3 bg-red-900/50 rounded-lg text-red-300">
+                                <strong>Máxima:</strong> ${max}°C
+                            </div>
+                            <div class="p-3 bg-blue-900/50 rounded-lg text-blue-300">
+                                <strong>Mínima:</strong> ${min}°C
+                            </div>
+                            <div class="p-3 bg-green-900/50 rounded-lg text-green-300">
+                                <strong>Média:</strong> ${avg}°C
+                            </div>
+                        `;
+                    }
+                });
+            }
+            // Botão voltar
             const backButton = document.getElementById('back-to-list-button');
             if (backButton) {
                 backButton.addEventListener('click', async () => {
@@ -467,35 +683,8 @@ export const render = {
                     await render.deviceCards();
                 });
             }
-            
-            // Aguardar o DOM atualizar
-            requestAnimationFrame(() => {
-                const chartCanvas = document.getElementById('temperature-chart');
-                
-                if (chartCanvas) {
-                    renderChart(chartCanvas, readings);
-                }
-                
-            const statsContent = document.getElementById('stats-content');
-                if (statsContent) {
-                    const temps = readings.map(r => r.temperature);
-                    const max = Math.max(...temps).toFixed(2);
-                    const min = Math.min(...temps).toFixed(2);
-                    const avg = (temps.reduce((a, b) => a + b, 0) / temps.length).toFixed(2);
-                    
-                    statsContent.innerHTML = `
-                        <div class="p-3 bg-red-900/50 rounded-lg text-red-300">
-                            <strong>Máxima:</strong> ${max}°C
-                        </div>
-                        <div class="p-3 bg-blue-900/50 rounded-lg text-blue-300">
-                            <strong>Mínima:</strong> ${min}°C
-                        </div>
-                        <div class="p-3 bg-green-900/50 rounded-lg text-green-300">
-                            <strong>Média:</strong> ${avg}°C
-                        </div>
-                    `;
-                }
-            });
+            // Primeira renderização
+            atualizarGraficoEStats();
         } catch (error) {
             console.error('Erro ao carregar detalhes do dispositivo:', error);
         }
@@ -791,5 +980,15 @@ document.addEventListener('click', async (e) => {
                 toast.error('Erro ao carregar detalhes do dispositivo');
             }
         }
+    }
+});
+
+// Após inserir o HTML dos inputs de data/hora, inicializar o flatpickr:
+requestAnimationFrame(() => {
+    if (window.flatpickr) {
+        flatpickr("#start-date", { enableTime: true, dateFormat: "Y-m-d H:i" });
+        flatpickr("#end-date", { enableTime: true, dateFormat: "Y-m-d H:i" });
+    } else {
+        console.error("flatpickr não está disponível no escopo global!");
     }
 });

@@ -9,6 +9,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; }
@@ -72,6 +74,17 @@
                 <button id="back-to-list-button" class="mb-4 rounded-lg bg-slate-600 px-4 py-2 text-sm text-white hover:bg-slate-700">&larr; Voltar</button>
                 <div class="rounded-lg bg-slate-800 p-6 shadow-xl">
                     <h3 class="text-xl font-bold text-white mb-4">${device.name}</h3>
+                    <div class="flex gap-2 mb-4">
+                        <label>
+                            De:
+                            <input type="datetime-local" id="start-date" class="rounded p-1">
+                        </label>
+                        <label>
+                            Até:
+                            <input type="datetime-local" id="end-date" class="rounded p-1">
+                        </label>
+                        <button id="search-history" class="bg-blue-600 text-white px-3 py-1 rounded">Buscar</button>
+                    </div>
                     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
                         <div class="lg:col-span-3">
                             <h4 class="text-lg font-semibold mb-2 text-slate-200">Últimas 24 Leituras</h4>
@@ -98,6 +111,9 @@
 
     <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 w-full max-w-sm sm:max-w-md md:max-w-lg px-4 sm:px-0"></div>
 
-    <script type="module" src="./assets/js/main.js"></script>
+    <script src="./assets/js/api.js"></script>
+    <script src="./assets/js/toast.js"></script>
+    <script src="./assets/js/ui.js"></script>
+    <script src="./assets/js/main.js"></script>
 </body>
 </html>

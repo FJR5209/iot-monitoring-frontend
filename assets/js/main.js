@@ -1,11 +1,6 @@
 // --- Módulo Principal ---
 // O ponto de entrada da nossa aplicação, que orquestra tudo.
 
-import { apiRequest } from './api.js';
-import { render } from './ui.js';
-import { toast } from './toast.js';
-
-
 document.addEventListener('DOMContentLoaded', () => {
     // --- Seletores do DOM ---
     const elements = {  
@@ -324,7 +319,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         render.deviceCards();
-
     }
 
     init();
@@ -333,11 +327,10 @@ document.addEventListener('DOMContentLoaded', () => {
 document.addEventListener('click', async (e) => {
     const deviceCard = e.target.closest('.device-card');
     if (deviceCard) {
-       
         const deviceId = deviceCard.dataset.deviceid;
         const deviceName = deviceCard.dataset.devicename;
         if (deviceId) {
-           
+            console.log('[main.js] Card clicado:', { deviceId, deviceName });
             try {
                 // Mostrar loading
                 const mainContentView = document.getElementById('main-content-view');
@@ -349,9 +342,7 @@ document.addEventListener('click', async (e) => {
                         </div>
                     </div>
                 `;
-                
-                // Chamar a função de detalhes
-              
+                // Chamar a função de detalhes do render
                 await render.deviceDetail(deviceId, deviceName);
             } catch (error) {
                 console.error('[main.js] Erro ao carregar detalhes:', error);
@@ -359,51 +350,4 @@ document.addEventListener('click', async (e) => {
             }
         }
     }
-});
-
-async function deviceDetails(deviceId, deviceName) {
-    const deviceDetailView = document.getElementById('device-detail-view');
-    if (deviceDetailView) {
-        deviceDetailView.innerHTML = '<div style="color:yellow; font-size:20px;div>';
-    }
-
-}
-
-document.querySelectorAll('.device-card').forEach(card => {
-    card.addEventListener('click', function() {
-        const deviceId = this.getAttribute('data-deviceid');
-        const deviceName = this.getAttribute('data-devicename');
-        deviceDetails(deviceId, deviceName);
-    });
-});
-
-// Exemplo de renderização de cards
-function renderDeviceCards(devices) {
-  const container = document.getElementById('main-content-view');
-  container.innerHTML = devices.map(device => `
-    <div class="device-card" data-deviceid="${device.id}" data-devicename="${device.name}">
-      ${device.name}
-    </div>
-  `).join('');
-  // Aqui deveria ter o addEventListener
-}
-
-document.addEventListener('click', (e) => {
-
-});
-
-function switchView(viewName) {
-    const main = document.getElementById('main-content-view');
-    const detail = document.getElementById('device-detail-view');
-    if (viewName === 'detail') {
-        main.style.display = 'none';
-        main.classList.add('hidden');
-        detail.style.display = 'block';
-        detail.classList.remove('hidden');
-    } else {
-        main.style.display = 'block';
-        main.classList.remove('hidden');
-        detail.style.display = 'none';
-        detail.classList.add('hidden');
-    }
-}
+}); 

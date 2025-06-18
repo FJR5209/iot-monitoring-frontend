@@ -10,7 +10,7 @@ const API_URL = 'https://iot-monitoring-backend-yzqm.onrender.com/api/v1';
  * @param {object|null} body - O corpo do pedido para métodos POST ou PUT.
  * @returns {Promise<any>} A resposta da API em formato JSON.
  */
-export async function apiRequest(endpoint, method = 'GET', body = null) {
+async function apiRequest(endpoint, method = 'GET', body = null) {
     const authToken = localStorage.getItem('authToken');
     if (!authToken) {
         window.location.href = 'login.html';
@@ -60,3 +60,5 @@ export async function apiRequest(endpoint, method = 'GET', body = null) {
         throw error;
     }
 }
+
+window.apiRequest = apiRequest;

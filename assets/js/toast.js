@@ -7,7 +7,7 @@
  * @param {string} type - O tipo do toast (success, error, warning, info).
  * @param {number} duration - A duração em milissegundos (padrão: 3000).
  */
-export function showToast(message, type = 'info', duration = 3000) {
+function showToast(message, type = 'info', duration = 3000) {
     const container = document.getElementById('toast-container');
     if (!container) return;
 
@@ -109,9 +109,11 @@ function removeToast(toast) {
 }
 
 // Exportar funções auxiliares para tipos comuns
-export const toast = {
+const toast = {
     success: (message, duration) => showToast(message, 'success', duration),
     error: (message, duration) => showToast(message, 'error', duration),
     warning: (message, duration) => showToast(message, 'warning', duration),
     info: (message, duration) => showToast(message, 'info', duration)
-}; 
+};
+
+window.toast = toast; 

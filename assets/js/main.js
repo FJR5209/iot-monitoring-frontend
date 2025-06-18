@@ -3,12 +3,12 @@
 
 import { apiRequest } from './api.js';
 import { render } from './ui.js';
+import { toast } from './toast.js';
+
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('[main.js] > DOM carregado. A iniciar a aplicação...');
-
     // --- Seletores do DOM ---
-    const elements = {
+    const elements = {  
         mainContentView: document.getElementById('main-content-view'),
         userMenuButton: document.getElementById('user-menu-button'),
         userMenu: document.getElementById('user-menu'),
@@ -29,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     if (!state.user) {
-        console.error("[main.js] > ERRO: Utilizador não encontrado no localStorage. A redirecionar para o login.");
         window.location.href = 'login.html';
         return;
     }
@@ -41,24 +40,60 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'login.html';
         },
         deleteUser: async (userId) => {
-            if (confirm('Tem a certeza que deseja apagar este utilizador?')) {
+            const modalContainer = document.getElementById('modal-container');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            
+            modalContainer.classList.remove('hidden');
+            modalTitle.textContent = 'Confirmar Exclusão';
+            modalBody.innerHTML = `
+                <div class="space-y-4">
+                    <p class="text-slate-300">Tem a certeza que deseja apagar este usuário?</p>
+                    <div class="flex justify-end space-x-2">
+                        <button id="cancel-modal-button" class="bg-slate-500 text-white px-4 py-2 rounded-lg">Cancelar</button>
+                        <button id="confirm-delete-user" class="bg-red-600 text-white px-4 py-2 rounded-lg">Apagar</button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('confirm-delete-user').addEventListener('click', async () => {
                 try {
                     await apiRequest(`/users/${userId}`, 'DELETE');
+                    modalContainer.classList.add('hidden');
+                    toast.success('Usuário apagado com sucesso!');
                     render.userManagement();
                 } catch (error) {
-                    alert(`Erro ao apagar: ${error.message}`);
+                    toast.error(`Erro ao apagar: ${error.message}`);
                 }
-            }
+            });
         },
         deleteDevice: async (deviceId) => {
-             if (confirm('Tem a certeza? Os dados de histórico deste dispositivo não serão apagados.')) {
+            const modalContainer = document.getElementById('modal-container');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            
+            modalContainer.classList.remove('hidden');
+            modalTitle.textContent = 'Confirmar Exclusão';
+            modalBody.innerHTML = `
+                <div class="space-y-4">
+                    <p class="text-slate-300">Tem a certeza? Os dados de histórico deste dispositivo não serão apagados.</p>
+                    <div class="flex justify-end space-x-2">
+                        <button id="cancel-modal-button" class="bg-slate-500 text-white px-4 py-2 rounded-lg">Cancelar</button>
+                        <button id="confirm-delete-device" class="bg-red-600 text-white px-4 py-2 rounded-lg">Apagar</button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('confirm-delete-device').addEventListener('click', async () => {
                 try {
                     await apiRequest(`/devices/${deviceId}`, 'DELETE');
+                    modalContainer.classList.add('hidden');
+                    toast.success('Dispositivo apagado com sucesso!');
                     render.deviceManagement();
                 } catch(error) {
-                    alert(`Erro ao apagar: ${error.message}`);
+                    toast.error(`Erro ao apagar: ${error.message}`);
                 }
-            }
+            });
         },
         saveUser: async (event) => {
             event.preventDefault();
@@ -82,15 +117,20 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 if (userId) {
                     await apiRequest(`/users/${userId}`, 'PUT', payload);
+                    toast.success('Usuário atualizado com sucesso!');
                 } else {
-                    if (!password) { alert('A senha é obrigatória para novos utilizadores.'); return; }
+                    if (!password) { 
+                        toast.error('A senha é obrigatória para novos usuários.');
+                        return; 
+                    }
                     payload.tenantName = state.user.tenant;
                     await apiRequest(`/auth/register`, 'POST', payload);
+                    toast.success('Usuário criado com sucesso!');
                 }
                 elements.modalContainer.classList.add('hidden');
                 render.userManagement();
             } catch (error) { 
-                alert(`Erro ao salvar: ${error.message}`); 
+                toast.error(`Erro ao salvar: ${error.message}`); 
             }
         },
         saveDevice: async (event) => {
@@ -105,13 +145,15 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 if (deviceId) {
                     await apiRequest(`/devices/${deviceId}`, 'PUT', payload);
+                    toast.success('Dispositivo atualizado com sucesso!');
                     elements.modalContainer.classList.add('hidden');
                     render.deviceManagement();
                 } else {
                     const newDevice = await apiRequest('/devices', 'POST', payload);
+                    toast.success('Dispositivo criado com sucesso!');
                     document.getElementById('modal-title').textContent = 'Dispositivo Criado com Sucesso!';
                     modalBody.innerHTML = `
-                        <p class="mb-4 text-slate-300">Guarde esta Device Key. Ela é necessária para configurar o seu dispositivo físico e para vinculá-lo a utilizadores.</p>
+                        <p class="mb-4 text-slate-300">Guarde esta Device Key. Ela é necessária para configurar o seu dispositivo físico e para vinculá-lo a usuários.</p>
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-slate-400">Device Key</label>
                             <input type="text" readonly value="${newDevice.deviceKey}" class="w-full p-2 border rounded bg-slate-700 border-slate-600">
@@ -121,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>`;
                 }
             } catch(error) { 
-                alert(`Erro ao salvar: ${error.message}`); 
+                toast.error(`Erro ao salvar: ${error.message}`); 
             }
         },
         saveMyProfile: async (e) => {
@@ -136,16 +178,15 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 await apiRequest('/users/me', 'PUT', payload);
                 elements.modalContainer.classList.add('hidden');
-                alert('Perfil atualizado com sucesso!');
+                toast.success('Perfil atualizado com sucesso!');
             } catch(error) { 
-                alert(`Erro ao salvar: ${error.message}`); 
+                toast.error(`Erro ao salvar: ${error.message}`); 
             }
         },
     };
 
     // --- Inicialização e Event Listeners ---
     function init() {
-        console.log('[main.js] > A iniciar. Utilizador:', state.user);
         elements.menuUserEmail.textContent = state.user.email;
         if (state.user.role !== 'admin') {
             elements.manageUsersLink.style.display = 'none';
@@ -160,35 +201,41 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         const menuActions = {
-            'view-devices-link': render.deviceCards,
-            'manage-devices-link': render.deviceManagement,
-            'manage-users-link': render.userManagement,
-            'my-profile-link': render.myProfileForm,
+            'view-devices-link': () => {
+                render.deviceCards();
+            },
+            'manage-devices-link': () => {
+                render.deviceManagement();
+            },
+            'manage-users-link': () => {
+                render.userManagement();
+            },
+            'my-profile-link': () => {
+                render.myProfileForm();
+            },
             'logout-link': actions.logout,
-            'home-link': render.deviceCards,
+            'home-link': () => {
+                render.deviceCards();
+            },
         };
 
-        console.log('[main.js] > A ligar os botões do menu...');
         for (const id in menuActions) {
             const elementKey = id.replace(/-(\w)/g, (_, letter) => letter.toUpperCase());
             const element = elements[elementKey];
             
-            console.log(`[main.js] > A procurar pelo elemento do menu: #${id}`);
             if (element) {
-                console.log(`[main.js] > SUCESSO: Elemento #${id} encontrado. A adicionar listener.`);
                 element.addEventListener('click', e => {
                     e.preventDefault();
                     menuActions[id]();
                     elements.userMenu.classList.add('hidden');
                 });
-            } else {
-                console.error(`[main.js] > ERRO: Elemento #${id} não foi encontrado no HTML ou no objeto 'elements'.`);
             }
         }
         
-        elements.deviceDetailView.addEventListener('click', e => {
+        elements.deviceDetailView.addEventListener('click', async (e) => {
             if (e.target && e.target.id === 'back-to-list-button') {
-                render.deviceCards();
+                switchView('list');
+                await render.deviceCards();
             }
         });
         
@@ -201,35 +248,162 @@ document.addEventListener('DOMContentLoaded', () => {
                 'edit-device-button': () => render.deviceForm(target.dataset.deviceid),
                 'delete-device-button': () => actions.deleteDevice(target.dataset.deviceid),
                 'create-device-button': () => render.deviceForm(),
-                'device-card': () => render.deviceDetail(target.dataset.deviceid, target.dataset.devicename),
+                'device-card': function() {
+                    render.deviceDetail(this.dataset.deviceid, this.dataset.devicename);
+                },
             };
             for (const className in actionMap) {
-                if (target.matches(`.${className}, #${className}`)) {
-                    actionMap[className]();
+                const card = target.closest(`.${className}, #${className}`);
+                if (card) {
+                    actionMap[className].call(card, e);
                     break;
                 }
             }
         });
         
-        elements.modalContainer.addEventListener('click', (e) => {
-             if (e.target.id === 'cancel-modal-button' || e.target.id === 'close-success-modal') {
+        elements.modalContainer.addEventListener('click', e => {
+            if (e.target === elements.modalContainer) {
                 elements.modalContainer.classList.add('hidden');
             }
         });
-
-        elements.modalContainer.addEventListener('submit', (e) => {
-            if (e.target.id === 'user-form') {
-                actions.saveUser(e);
-            } else if (e.target.id === 'device-form') {
-                actions.saveDevice(e);
-            } else if (e.target.id === 'profile-form') {
-                actions.saveMyProfile(e);
+        
+        document.getElementById('modal-container').addEventListener('click', e => {
+            if (e.target.id === 'cancel-modal-button') {
+                elements.modalContainer.classList.add('hidden');
+            }
+        });
+        
+        document.getElementById('modal-container').addEventListener('submit', e => {
+            const formId = e.target.id;
+            if (formId === 'user-form') actions.saveUser(e);
+            else if (formId === 'device-form') actions.saveDevice(e);
+            else if (formId === 'profile-form') actions.saveMyProfile(e);
+        });
+        
+        elements.mainContentView.addEventListener('submit', async (e) => {
+            if (e.target.id === 'search-form') {
+                e.preventDefault();
+                const searchInput = e.target.querySelector('#search-input');
+                const searchValue = searchInput.value.trim();
+                const currentView = document.getElementById('main-content-view');
+                const headerText = currentView.querySelector('h3')?.textContent;
+                
+                console.log('[search-form] Valor de pesquisa:', searchValue);
+                console.log('[search-form] View atual:', headerText);
+                
+                if (headerText === 'Gestão de Usuários') {
+                    await render.userManagement(1, searchValue);
+                } else if (headerText === 'Gestão de Dispositivos') {
+                    await render.deviceManagement(1, searchValue);
+                } else {
+                    await render.deviceCards(1, searchValue);
+                }
             }
         });
 
-        console.log('[main.js] > Inicialização completa. A renderizar a vista inicial...');
+        elements.mainContentView.addEventListener('input', e => {
+            if (e.target.id === 'search-input') {
+                const searchValue = e.target.value.trim();
+                const mainContent = document.getElementById('main-content-view');
+                const headerText = mainContent.querySelector('h3')?.textContent;
+                
+                clearTimeout(window.searchTimeout);
+                window.searchTimeout = setTimeout(() => {
+                    if (headerText === 'Gestão de Usuários') {
+                        console.log('Pesquisa em tempo real - Gestão de Usuários:', searchValue);
+                        render.userManagement(1, searchValue);
+                    } else if (headerText === 'Gestão de Dispositivos') {
+                        console.log('Pesquisa em tempo real - Gestão de Dispositivos:', searchValue);
+                        render.deviceManagement(1, searchValue);
+                    } else {
+                        console.log('Pesquisa em tempo real - Seus Dispositivos:', searchValue);
+                        render.deviceCards(1, searchValue);
+                    }
+                }, 300);
+            }
+        });
+        
         render.deviceCards();
+
     }
 
     init();
 });
+
+document.addEventListener('click', async (e) => {
+    const deviceCard = e.target.closest('.device-card');
+    if (deviceCard) {
+       
+        const deviceId = deviceCard.dataset.deviceid;
+        const deviceName = deviceCard.dataset.devicename;
+        if (deviceId) {
+           
+            try {
+                // Mostrar loading
+                const mainContentView = document.getElementById('main-content-view');
+                mainContentView.innerHTML = `
+                    <div class="rounded-lg bg-slate-800 p-6 shadow-xl">
+                        <div class="flex items-center justify-center">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                            <span class="ml-2 text-slate-300">Carregando detalhes do dispositivo...</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Chamar a função de detalhes
+              
+                await render.deviceDetail(deviceId, deviceName);
+            } catch (error) {
+                console.error('[main.js] Erro ao carregar detalhes:', error);
+                toast.error('Erro ao carregar detalhes do dispositivo');
+            }
+        }
+    }
+});
+
+async function deviceDetails(deviceId, deviceName) {
+    const deviceDetailView = document.getElementById('device-detail-view');
+    if (deviceDetailView) {
+        deviceDetailView.innerHTML = '<div style="color:yellow; font-size:20px;div>';
+    }
+
+}
+
+document.querySelectorAll('.device-card').forEach(card => {
+    card.addEventListener('click', function() {
+        const deviceId = this.getAttribute('data-deviceid');
+        const deviceName = this.getAttribute('data-devicename');
+        deviceDetails(deviceId, deviceName);
+    });
+});
+
+// Exemplo de renderização de cards
+function renderDeviceCards(devices) {
+  const container = document.getElementById('main-content-view');
+  container.innerHTML = devices.map(device => `
+    <div class="device-card" data-deviceid="${device.id}" data-devicename="${device.name}">
+      ${device.name}
+    </div>
+  `).join('');
+  // Aqui deveria ter o addEventListener
+}
+
+document.addEventListener('click', (e) => {
+
+});
+
+function switchView(viewName) {
+    const main = document.getElementById('main-content-view');
+    const detail = document.getElementById('device-detail-view');
+    if (viewName === 'detail') {
+        main.style.display = 'none';
+        main.classList.add('hidden');
+        detail.style.display = 'block';
+        detail.classList.remove('hidden');
+    } else {
+        main.style.display = 'block';
+        main.classList.remove('hidden');
+        detail.style.display = 'none';
+        detail.classList.add('hidden');
+    }
+}

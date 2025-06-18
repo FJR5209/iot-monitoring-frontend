@@ -1,7 +1,7 @@
 // --- Módulo de API ---
 // Responsável por toda a comunicação com o backend.
 
-const API_URL = 'https://iot-monitoring-backend-yzqm.onrender.com/api/v1';
+const API_URL = 'http://localhost:3000/api/v1';
 
 /**
  * Função genérica para fazer pedidos à nossa API.
@@ -14,7 +14,7 @@ export async function apiRequest(endpoint, method = 'GET', body = null) {
     const authToken = localStorage.getItem('authToken');
     if (!authToken) {
         window.location.href = 'login.html';
-        throw new Error("Utilizador não autenticado.");
+        throw new Error("Usuário não autenticado.");
     }
 
     const headers = {
@@ -35,15 +35,28 @@ export async function apiRequest(endpoint, method = 'GET', body = null) {
             return;
         }
 
+        let data;
         const contentType = response.headers.get("content-type");
-        const data = contentType && contentType.includes("application/json") ? await response.json() : null;
+        
+        if (contentType && contentType.includes("application/json")) {
+            data = await response.json();
+        } else {
+            const text = await response.text();
+            data = { data: text };
+        }
 
         if (!response.ok) {
-            throw new Error(data ? data.message : `Erro na API: ${response.statusText}`);
+            const errorMessage = data ? data.message : `Erro na API: ${response.statusText}`;
+            throw new Error(errorMessage);
         }
+
+        // Garantir que a resposta sempre tenha a propriedade data
+        if (!data || typeof data !== 'object') {
+            data = { data: data };
+        }
+        
         return data;
     } catch (error) {
-        console.error(`Falha no pedido da API para ${endpoint}:`, error);
         throw error;
     }
 }

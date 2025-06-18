@@ -1,7 +1,7 @@
 // --- Módulo de API ---
 // Responsável por toda a comunicação com o backend.
 
-const API_URL = 'http://localhost:3000/api/v1';
+const API_URL = 'https://iot-monitoring-backend-yzqm.onrender.com/api/v1';
 
 /**
  * Função genérica para fazer pedidos à nossa API.

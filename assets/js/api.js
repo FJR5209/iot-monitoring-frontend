@@ -1,7 +1,43 @@
 // --- Módulo de API ---
 // Responsável por toda a comunicação com o backend.
 
-const API_URL = 'https://iot-monitoring-backend-zjvs.onrender.com';
+const API_URL = 'https://iot-monitoring-backend-zjvs.onrender.com/api/v1';
+
+/**
+ * Função para fazer login do usuário.
+ * @param {string} email - Email do usuário.
+ * @param {string} password - Senha do usuário.
+ * @returns {Promise<object>} Dados do usuário logado.
+ */
+async function login(email, password) {
+    try {
+        const response = await fetch(`${API_URL}/auth/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.message || 'Erro ao fazer login.');
+        }
+
+        // Salvar dados de autenticação no localStorage
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('user', JSON.stringify({
+            email: data.email,
+            tenant: data.tenant,
+            role: data.role
+        }));
+
+        return data;
+    } catch (error) {
+        throw error;
+    }
+}
 
 /**
  * Função genérica para fazer pedidos à nossa API.
@@ -112,5 +148,63 @@ async function exportReport(payload = {}) {
     }
 }
 
+/**
+ * Função para solicitar recuperação de senha.
+ * @param {string} email - Email do usuário.
+ * @returns {Promise<object>} Resposta da API.
+ */
+async function forgotPassword(email) {
+    try {
+        const response = await fetch(`${API_URL}/auth/forgot-password`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email })
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.message || 'Erro ao solicitar recuperação de senha.');
+        }
+
+        return data;
+    } catch (error) {
+        throw error;
+    }
+}
+
+/**
+ * Função para redefinir senha com token.
+ * @param {string} token - Token de recuperação.
+ * @param {string} password - Nova senha.
+ * @returns {Promise<object>} Resposta da API.
+ */
+async function resetPassword(token, password) {
+    try {
+        const response = await fetch(`${API_URL}/auth/reset-password/${token}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ password })
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.message || 'Erro ao redefinir senha.');
+        }
+
+        return data;
+    } catch (error) {
+        throw error;
+    }
+}
+
 window.apiRequest = apiRequest;
 window.exportReport = exportReport;
+window.login = login;
+window.forgotPassword = forgotPassword;
+window.resetPassword = resetPassword;

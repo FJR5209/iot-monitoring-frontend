@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
         myProfileLink: document.getElementById('my-profile-link'),
         manageUsersLink: document.getElementById('manage-users-link'),
         manageDevicesLink: document.getElementById('manage-devices-link'),
+        exportReportLink: document.getElementById('export-report-link'),
         viewDevicesLink: document.getElementById('view-devices-link'),
         logoutLink: document.getElementById('logout-link'),
         homeLink: document.getElementById('home-link'),
@@ -90,42 +91,82 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         },
-        saveUser: async (event) => {
-            event.preventDefault();
-            const modalBody = document.getElementById('modal-body');
-            const userId = modalBody.querySelector('#userId').value;
-            const password = modalBody.querySelector('#userPassword').value;
-            
-            const payload = {
-                name: modalBody.querySelector('#userName').value,
-                email: modalBody.querySelector('#userEmail').value,
-                role: modalBody.querySelector('#userRole').value,
-                phoneNumber: modalBody.querySelector('#userPhone').value,
-                whatsappApiKey: modalBody.querySelector('#userWhatsappKey').value,
-            };
-            if (password) payload.password = password;
+        saveUser: async (form) => {
+            const userId = form.querySelector('#userId').value;
+            const password = form.querySelector('#password').value;
 
-            if (payload.role === 'viewer') { 
-                payload.devices = Array.from(modalBody.querySelectorAll('#device-list-checkboxes input:checked')).map(cb => cb.value); 
-            }
-            
-            try {
-                if (userId) {
-                    await apiRequest(`/users/${userId}`, 'PUT', payload);
-                    toast.success('Usuário atualizado com sucesso!');
-                } else {
-                    if (!password) { 
-                        toast.error('A senha é obrigatória para novos usuários.');
-                        return; 
-                    }
-                    payload.tenantName = state.user.tenant;
+            // Se for um novo usuário, a lógica é diferente.
+            if (!userId) {
+                if (!password) { 
+                    toast.error('A senha é obrigatória para novos usuários.');
+                    return; 
+                }
+                const payload = {
+                    name: form.querySelector('#name').value,
+                    email: form.querySelector('#email').value,
+                    role: form.querySelector('#role').value,
+                    password: password,
+                    phoneNumber: form.querySelector('#userPhone').value,
+                    whatsappApiKey: form.querySelector('#userWhatsappKey').value,
+                    tenantName: state.user.tenant,
+                    devices: Array.from(form.querySelectorAll('#device-checkboxes input:checked')).map(cb => cb.value)
+                };
+                try {
                     await apiRequest(`/auth/register`, 'POST', payload);
                     toast.success('Usuário criado com sucesso!');
+                    render.userManagement();
+                } catch (error) { 
+                    toast.error(`Erro ao criar usuário: ${error.message}`); 
                 }
-                elements.modalContainer.classList.add('hidden');
+                return;
+            }
+
+            // Lógica de atualização para um usuário existente
+            const initialState = JSON.parse(form.dataset.initialState || '{}');
+            const payload = {};
+            
+            const fields = {
+                name: form.querySelector('#name').value,
+                email: form.querySelector('#email').value,
+                role: form.querySelector('#role').value,
+                phoneNumber: form.querySelector('#userPhone').value,
+                whatsappApiKey: form.querySelector('#userWhatsappKey').value
+            };
+
+            for (const key in fields) {
+                // Compara o valor atual com o inicial. Usa '' como fallback para campos que podem não existir no estado inicial (ex: phoneNumber)
+                if (fields[key] !== (initialState[key] || '')) {
+                    payload[key] = fields[key];
+                }
+            }
+
+            if (password) {
+                payload.password = password;
+            }
+
+            const currentRole = fields.role;
+            // A comparação de dispositivos só é relevante se o papel atual ou inicial for 'viewer' ('user' para compatibilidade)
+            if (currentRole === 'viewer' || initialState.role === 'viewer' || currentRole === 'user' || initialState.role === 'user') {
+                // Extrai apenas os IDs dos dispositivos do estado inicial para uma comparação correta
+                const initialDevices = (initialState.devices || []).map(d => d._id || d).sort();
+                const currentDevices = Array.from(form.querySelectorAll('#device-checkboxes input:checked')).map(cb => cb.value).sort();
+                
+                if (JSON.stringify(initialDevices) !== JSON.stringify(currentDevices)) {
+                    payload.devices = currentDevices;
+                }
+            }
+            
+            if (Object.keys(payload).length === 0) {
+                toast.info('Nenhuma alteração para salvar.');
+                return;
+            }
+
+            try {
+                await apiRequest(`/users/${userId}`, 'PUT', payload);
+                toast.success('Usuário atualizado com sucesso!');
                 render.userManagement();
             } catch (error) { 
-                toast.error(`Erro ao salvar: ${error.message}`); 
+                toast.error(`Erro ao atualizar: ${error.message}`); 
             }
         },
         saveDevice: async (event) => {
@@ -205,6 +246,9 @@ document.addEventListener('DOMContentLoaded', () => {
             'manage-users-link': () => {
                 render.userManagement();
             },
+            'export-report-link': () => {
+                render.exportReportForm();
+            },
             'my-profile-link': () => {
                 render.myProfileForm();
             },
@@ -270,21 +314,21 @@ document.addEventListener('DOMContentLoaded', () => {
         
         document.getElementById('modal-container').addEventListener('submit', e => {
             const formId = e.target.id;
-            if (formId === 'user-form') actions.saveUser(e);
-            else if (formId === 'device-form') actions.saveDevice(e);
+            if (formId === 'device-form') actions.saveDevice(e);
             else if (formId === 'profile-form') actions.saveMyProfile(e);
         });
         
         elements.mainContentView.addEventListener('submit', async (e) => {
-            if (e.target.id === 'search-form') {
+            const formId = e.target.id;
+            if (formId === 'user-form') {
+                e.preventDefault();
+                actions.saveUser(e.target);
+            } else if (formId === 'search-form') {
                 e.preventDefault();
                 const searchInput = e.target.querySelector('#search-input');
                 const searchValue = searchInput.value.trim();
                 const currentView = document.getElementById('main-content-view');
                 const headerText = currentView.querySelector('h3')?.textContent;
-                
-                console.log('[search-form] Valor de pesquisa:', searchValue);
-                console.log('[search-form] View atual:', headerText);
                 
                 if (headerText === 'Gestão de Usuários') {
                     await render.userManagement(1, searchValue);
@@ -293,28 +337,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     await render.deviceCards(1, searchValue);
                 }
-            }
-        });
-
-        elements.mainContentView.addEventListener('input', e => {
-            if (e.target.id === 'search-input') {
-                const searchValue = e.target.value.trim();
-                const mainContent = document.getElementById('main-content-view');
-                const headerText = mainContent.querySelector('h3')?.textContent;
-                
-                clearTimeout(window.searchTimeout);
-                window.searchTimeout = setTimeout(() => {
-                    if (headerText === 'Gestão de Usuários') {
-                        console.log('Pesquisa em tempo real - Gestão de Usuários:', searchValue);
-                        render.userManagement(1, searchValue);
-                    } else if (headerText === 'Gestão de Dispositivos') {
-                        console.log('Pesquisa em tempo real - Gestão de Dispositivos:', searchValue);
-                        render.deviceManagement(1, searchValue);
-                    } else {
-                        console.log('Pesquisa em tempo real - Seus Dispositivos:', searchValue);
-                        render.deviceCards(1, searchValue);
-                    }
-                }, 300);
+            } else if (formId === 'export-report-form') {
+                e.preventDefault();
+                exportReportToPDF();
             }
         });
         
@@ -330,7 +355,6 @@ document.addEventListener('click', async (e) => {
         const deviceId = deviceCard.dataset.deviceid;
         const deviceName = deviceCard.dataset.devicename;
         if (deviceId) {
-            console.log('[main.js] Card clicado:', { deviceId, deviceName });
             try {
                 // Mostrar loading
                 const mainContentView = document.getElementById('main-content-view');

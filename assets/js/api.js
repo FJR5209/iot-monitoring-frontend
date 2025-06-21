@@ -1,7 +1,7 @@
 // --- Módulo de API ---
 // Responsável por toda a comunicação com o backend.
 
-const API_URL = 'https://iot-monitoring-backend-yzqm.onrender.com/api/v1';
+const API_URL = 'https://iot-monitoring-backend-zjvs.onrender.com';
 
 /**
  * Função genérica para fazer pedidos à nossa API.
@@ -61,4 +61,56 @@ async function apiRequest(endpoint, method = 'GET', body = null) {
     }
 }
 
+/**
+ * Função específica para exportar relatórios em PDF.
+ * @param {object} payload - Objeto com startDate, endDate e devices opcionais.
+ * @returns {Promise<Blob>} O arquivo PDF como Blob.
+ */
+async function exportReport(payload = {}) {
+    const authToken = localStorage.getItem('authToken');
+    if (!authToken) {
+        window.location.href = 'login.html';
+        throw new Error("Usuário não autenticado.");
+    }
+
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+    };
+    
+    const config = { 
+        method: 'POST', 
+        headers,
+        body: JSON.stringify(payload)
+    };
+
+    try {
+        const response = await fetch(`${API_URL}/dashboard/export-report`, config);
+        
+        if (response.status === 401) {
+            localStorage.clear();
+            window.location.href = 'login.html';
+            return;
+        }
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            let errorMessage;
+            try {
+                const errorData = JSON.parse(errorText);
+                errorMessage = errorData.message || `Erro na API: ${response.statusText}`;
+            } catch {
+                errorMessage = `Erro na API: ${response.statusText}`;
+            }
+            throw new Error(errorMessage);
+        }
+
+        // Retorna o Blob diretamente
+        return await response.blob();
+    } catch (error) {
+        throw error;
+    }
+}
+
 window.apiRequest = apiRequest;
+window.exportReport = exportReport;

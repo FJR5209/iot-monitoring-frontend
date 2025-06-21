@@ -203,8 +203,28 @@ async function resetPassword(token, password) {
     }
 }
 
+/**
+ * Função para verificar se o backend está online.
+ * @returns {Promise<object>} Status do backend.
+ */
+async function healthCheck() {
+    try {
+        const response = await fetch(`${API_URL}/health`);
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.message || 'Erro no health check.');
+        }
+
+        return data;
+    } catch (error) {
+        throw error;
+    }
+}
+
 window.apiRequest = apiRequest;
 window.exportReport = exportReport;
 window.login = login;
 window.forgotPassword = forgotPassword;
 window.resetPassword = resetPassword;
+window.healthCheck = healthCheck;

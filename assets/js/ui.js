@@ -448,13 +448,68 @@ const render = {
                     const avgTempMsg = processedReadings.length > 0 ? `${avgTemp}°C` : 'Sem dados recentes';
                     const lastTempMsg = lastTemp !== 'N/A' ? `${lastTemp}°C` : 'Sem dados recentes';
 
+                    // Mostrar detalhes das leituras se existirem
+                    if (device.readings && device.readings.length > 0) {
+                        const lastReading = device.readings[device.readings.length - 1];
+                        const firstReading = device.readings[0];
+                        console.log(`[deviceCards] Leituras do dispositivo ${device.name}:`, {
+                            totalReadings: device.readings.length,
+                            lastReading: lastReading ? {
+                                timestamp: lastReading.timestamp,
+                                temperature: lastReading.temperature,
+                                date: new Date(lastReading.timestamp)
+                            } : null,
+                            firstReading: firstReading ? {
+                                timestamp: firstReading.timestamp,
+                                temperature: firstReading.temperature,
+                                date: new Date(firstReading.timestamp)
+                            } : null
+                        });
+                    }
+
+                    // Lógica de detecção do status online (mesma da função updateDeviceStatus)
+                    let effectiveIsOnline = device.isOnline;
+                    if (effectiveIsOnline === undefined || effectiveIsOnline === null || effectiveIsOnline === false) {
+                        // Verificar se há leituras recentes (últimos 10 minutos)
+                        const hasRecentReadings = device.readings && device.readings.length > 0;
+                        let lastReading = null;
+                        
+                        if (hasRecentReadings) {
+                            // Pegar a última leitura
+                            const lastReadingData = device.readings[device.readings.length - 1];
+                            if (lastReadingData && lastReadingData.timestamp) {
+                                lastReading = new Date(lastReadingData.timestamp);
+                            }
+                        }
+                        
+                        // Se não há leituras, verificar lastSeen
+                        if (!lastReading && device.lastSeen) {
+                            lastReading = new Date(device.lastSeen);
+                        }
+                        
+                        const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+                        effectiveIsOnline = lastReading && lastReading > tenMinutesAgo;
+                        
+                        console.log(`[deviceCards] Status calculado para ${device.name}:`, {
+                            isOnline: device.isOnline,
+                            hasRecentReadings,
+                            lastReading,
+                            lastSeen: device.lastSeen,
+                            tenMinutesAgo,
+                            effectiveIsOnline,
+                            readingsCount: device.readings ? device.readings.length : 0
+                        });
+                    } else {
+                        console.log(`[deviceCards] Status do dispositivo ${device.name}: ${effectiveIsOnline ? 'Online' : 'Offline'} (do backend)`);
+                    }
+
                     contentHtml += `
                         <div class="device-card bg-slate-700 rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow cursor-pointer relative" data-deviceid="${device._id}" data-devicename="${device.name}">
                             <!-- Status Indicator -->
                             <div class="absolute top-3 right-3">
                                 <div class="flex items-center gap-2 bg-slate-800/80 backdrop-blur-sm px-2 py-1 rounded-full">
-                                    <div class="w-2 h-2 rounded-full ${device.isOnline ? 'bg-green-400 animate-pulse' : 'bg-red-400'}" title="${device.lastSeen ? `Visto pela última vez em ${new Date(device.lastSeen).toLocaleString('pt-BR')}` : 'Nunca visto'}"></div>
-                                    <span class="text-xs text-slate-300 font-medium">${device.isOnline ? 'Online' : 'Offline'}</span>
+                                    <div class="w-2 h-2 rounded-full ${effectiveIsOnline ? 'bg-green-400 animate-pulse' : 'bg-red-400'}" title="${device.lastSeen ? `Visto pela última vez em ${new Date(device.lastSeen).toLocaleString('pt-BR')}` : 'Nunca visto'}"></div>
+                                    <span class="text-xs text-slate-300 font-medium">${effectiveIsOnline ? 'Online' : 'Offline'}</span>
                                 </div>
                             </div>
                             
@@ -1242,6 +1297,8 @@ async function updateDeviceDetailStatus(deviceId) {
  */
 async function updateDeviceStatus() {
     try {
+        console.log('[updateDeviceStatus] Iniciando atualização de status...');
+        
         // Buscar status atualizado dos dispositivos
         const response = await apiRequest('/devices');
         let devices = [];
@@ -1256,25 +1313,74 @@ async function updateDeviceStatus() {
             }
         }
         
-      
+        console.log('[updateDeviceStatus] Dispositivos encontrados:', devices.length);
         
         // Atualizar cada card com o status real
         const deviceCards = document.querySelectorAll('.device-card');
+        console.log('[updateDeviceStatus] Cards encontrados na página:', deviceCards.length);
+        
         deviceCards.forEach(card => {
             const deviceId = card.dataset.deviceid;
             const device = devices.find(d => d._id === deviceId);
             
             if (device) {
+                console.log(`[updateDeviceStatus] Atualizando dispositivo ${device.name}:`, {
+                    isOnline: device.isOnline,
+                    lastSeen: device.lastSeen,
+                    readingsCount: device.readings ? device.readings.length : 0
+                });
+                
+                // Mostrar detalhes das leituras se existirem
+                if (device.readings && device.readings.length > 0) {
+                    const lastReading = device.readings[device.readings.length - 1];
+                    const firstReading = device.readings[0];
+                    console.log(`[updateDeviceStatus] Leituras do dispositivo ${device.name}:`, {
+                        totalReadings: device.readings.length,
+                        lastReading: lastReading ? {
+                            timestamp: lastReading.timestamp,
+                            temperature: lastReading.temperature,
+                            date: new Date(lastReading.timestamp)
+                        } : null,
+                        firstReading: firstReading ? {
+                            timestamp: firstReading.timestamp,
+                            temperature: firstReading.temperature,
+                            date: new Date(firstReading.timestamp)
+                        } : null
+                    });
+                }
+                
                 // Lógica de fallback: se não há isOnline mas há leituras recentes, considerar online
                 let effectiveIsOnline = device.isOnline;
-                if (effectiveIsOnline === undefined || effectiveIsOnline === null) {
-                    // Se há leituras nos últimos 10 minutos, considerar online
+                if (effectiveIsOnline === undefined || effectiveIsOnline === null || effectiveIsOnline === false) {
+                    // Verificar se há leituras recentes (últimos 10 minutos)
                     const hasRecentReadings = device.readings && device.readings.length > 0;
-                    const lastReading = device.readings && device.readings.length > 0 ? 
-                        new Date(device.readings[device.readings.length - 1].timestamp) : null;
-                    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+                    let lastReading = null;
                     
-                    effectiveIsOnline = hasRecentReadings && lastReading && lastReading > tenMinutesAgo;
+                    if (hasRecentReadings) {
+                        // Pegar a última leitura
+                        const lastReadingData = device.readings[device.readings.length - 1];
+                        if (lastReadingData && lastReadingData.timestamp) {
+                            lastReading = new Date(lastReadingData.timestamp);
+                        }
+                    }
+                    
+                    // Se não há leituras, verificar lastSeen
+                    if (!lastReading && device.lastSeen) {
+                        lastReading = new Date(device.lastSeen);
+                    }
+                    
+                    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+                    effectiveIsOnline = lastReading && lastReading > tenMinutesAgo;
+                    
+                    console.log(`[updateDeviceStatus] Status calculado para ${device.name}:`, {
+                        isOnline: device.isOnline,
+                        hasRecentReadings,
+                        lastReading,
+                        lastSeen: device.lastSeen,
+                        tenMinutesAgo,
+                        effectiveIsOnline,
+                        readingsCount: device.readings ? device.readings.length : 0
+                    });
                 }
                 
                 const statusIndicator = card.querySelector('.absolute');
@@ -1293,6 +1399,8 @@ async function updateDeviceStatus() {
                             'Nunca';
                         
                         statusIndicator.title = `Visto pela última vez em ${lastSeenFormatted}`;
+                        
+                        console.log(`[updateDeviceStatus] Status atualizado para ${device.name}: ${effectiveIsOnline ? 'Online' : 'Offline'}`);
                     }
                     
                     // Atualizar última comunicação
@@ -1300,8 +1408,12 @@ async function updateDeviceStatus() {
                         lastSeenText.textContent = `Última comunicação: ${new Date(device.lastSeen).toLocaleString('pt-BR')}`;
                     }
                 }
+            } else {
+                console.log(`[updateDeviceStatus] Dispositivo não encontrado para card ID: ${deviceId}`);
             }
         });
+        
+        console.log('[updateDeviceStatus] Atualização concluída');
     } catch (error) {
         console.error('Erro ao atualizar status dos dispositivos:', error);
     }
@@ -1311,11 +1423,31 @@ async function updateDeviceStatus() {
  * Inicia a atualização automática do status dos dispositivos
  */
 function startDeviceStatusUpdates() {
+    // Função para verificar conectividade e atualizar status
+    const checkAndUpdate = async () => {
+        try {
+            // Primeiro verificar se o backend está online
+            await healthCheck();
+            console.log('[startDeviceStatusUpdates] Backend está online, atualizando status dos dispositivos...');
+            
+            // Se o backend está online, atualizar status dos dispositivos
+            await updateDeviceStatus();
+        } catch (error) {
+            console.error('[startDeviceStatusUpdates] Erro na verificação de conectividade:', error);
+            // Mesmo com erro, tentar atualizar status (pode ser um problema temporário)
+            try {
+                await updateDeviceStatus();
+            } catch (updateError) {
+                console.error('[startDeviceStatusUpdates] Erro ao atualizar status dos dispositivos:', updateError);
+            }
+        }
+    };
+    
     // Atualizar a cada 30 segundos
-    setInterval(updateDeviceStatus, 30000);
+    setInterval(checkAndUpdate, 30000);
     
     // Primeira atualização após 5 segundos
-    setTimeout(updateDeviceStatus, 5000);
+    setTimeout(checkAndUpdate, 5000);
 }
 
 /**
@@ -1352,3 +1484,62 @@ function stopDeviceDetailPolling() {
 document.addEventListener('DOMContentLoaded', () => {
     startDeviceStatusUpdates();
 });
+
+/**
+ * Função de teste para verificar o status de um dispositivo específico
+ * Pode ser chamada manualmente no console: testDeviceStatus('ID_DO_DISPOSITIVO')
+ */
+window.testDeviceStatus = async function(deviceId) {
+    try {
+        console.log(`[testDeviceStatus] Testando dispositivo ID: ${deviceId}`);
+        
+        // Buscar dados do dispositivo
+        const response = await apiRequest(`/devices/${deviceId}`);
+        const device = response.data || response;
+        
+        console.log(`[testDeviceStatus] Dados do dispositivo ${device.name}:`, {
+            id: device._id,
+            name: device.name,
+            isOnline: device.isOnline,
+            lastSeen: device.lastSeen,
+            readingsCount: device.readings ? device.readings.length : 0
+        });
+        
+        if (device.readings && device.readings.length > 0) {
+            const lastReading = device.readings[device.readings.length - 1];
+            const firstReading = device.readings[0];
+            const now = new Date();
+            const lastReadingDate = new Date(lastReading.timestamp);
+            const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
+            
+            console.log(`[testDeviceStatus] Análise das leituras:`, {
+                totalReadings: device.readings.length,
+                lastReading: {
+                    timestamp: lastReading.timestamp,
+                    temperature: lastReading.temperature,
+                    date: lastReadingDate,
+                    timeAgo: Math.round((now - lastReadingDate) / 1000 / 60) + ' minutos atrás'
+                },
+                firstReading: {
+                    timestamp: firstReading.timestamp,
+                    temperature: firstReading.temperature,
+                    date: new Date(firstReading.timestamp)
+                },
+                tenMinutesAgo: tenMinutesAgo,
+                isRecent: lastReadingDate > tenMinutesAgo,
+                shouldBeOnline: lastReadingDate > tenMinutesAgo
+            });
+        }
+        
+        // Testar health check
+        try {
+            const health = await healthCheck();
+            console.log(`[testDeviceStatus] Backend health:`, health);
+        } catch (healthError) {
+            console.error(`[testDeviceStatus] Erro no health check:`, healthError);
+        }
+        
+    } catch (error) {
+        console.error(`[testDeviceStatus] Erro ao testar dispositivo:`, error);
+    }
+};
